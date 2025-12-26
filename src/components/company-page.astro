@@ -14,6 +14,7 @@ import SnapshotGrid from './company/snapshot-grid.astro';
 import IdentityCard from './company/identity-card.astro';
 import ActivityCard from './company/activity-card.astro';
 import FinancialPulseCard from './company/financial-pulse-card.astro';
+import RelatedCompanies from './company/related-companies.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -21,6 +22,7 @@ import { ExternalLink, Coins, TrendingUp, TrendingDown } from 'lucide-react';
 import { t } from '@/lib/i18n/translations';
 import type { SupportedLang } from '@/lib/i18n/translations';
 import type { JuridicalSituation, CompanyContact, FinancialSummary } from '@/lib/db/types';
+import type { RelatedCompany } from '@/lib/queries/related-companies';
 
 interface Props {
   company: {
@@ -47,9 +49,16 @@ interface Props {
     updated_at: string;
   };
   lang: string;
+  related: {
+    similar: RelatedCompany[];
+    neighbors: RelatedCompany[];
+    sectorName: string | null;
+    postalCode: string | null;
+    cityName: string | null | undefined;
+  };
 }
 
-const { company, lang } = Astro.props;
+const { company, lang, related } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const financials = company.financial_summary;
 
@@ -183,6 +192,16 @@ const formatCurrency = (value?: number) => {
       </div>
     </section>
   )}
+
+  <!-- Related Companies -->
+  <RelatedCompanies
+    similar={related.similar}
+    neighbors={related.neighbors}
+    sectorName={related.sectorName}
+    postalCode={related.postalCode}
+    cityName={related.cityName ?? null}
+    lang={lang}
+  />
 
   <!-- Footer -->
   <Separator />

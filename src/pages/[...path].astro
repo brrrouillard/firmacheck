@@ -7,6 +7,8 @@ import '@/styles/global.css';
 import CompanyPage from '@/components/company-page.astro';
 import { getSupabase, normalizeVat, formatVat, slugifyCompanyName } from '@/lib';
 import type { JuridicalSituation, CompanyContact, FinancialSummary } from '@/lib/db/types';
+import type { RelatedCompany } from '@/lib/queries/related-companies';
+import { getNaceDescription } from '@/lib/data/nace-codes';
 
 // Supported languages
 const SUPPORTED_LANGS = ['fr', 'nl', 'en'] as const;
@@ -34,18 +36,22 @@ if (!normalizedVat) {
   return new Response('Invalid VAT number', { status: 400 });
 }
 
-// Fetch company from database
+// Fetch company with related data in a single query
 const supabase = getSupabase();
-const { data: company, error } = await supabase
-  .from('companies')
-  .select('*')
-  .eq('vat_number', normalizedVat)
-  .single();
+const { data: result, error } = await supabase.rpc('get_company_with_related', {
+  p_vat_number: normalizedVat,
+  p_lang: lang,
+  p_limit: 3,
+});
 
 // Handle not found
-if (error || !company) {
+if (error || !result?.company) {
   return new Response('Company not found', { status: 404 });
 }
+
+const company = result.company;
+const similarCompanies = (result.similar || []) as RelatedCompany[];
+const neighborCompanies = (result.neighbors || []) as RelatedCompany[];
 
 // Generate canonical slug from current company name
 const canonicalSlug = slugifyCompanyName(company.name);
@@ -66,6 +72,15 @@ const rawAddress = company.address as {
   city_nl?: string;
   country?: string;
 } | null;
+
+// Prepare related data
+const relatedData = {
+  similar: similarCompanies,
+  neighbors: neighborCompanies,
+  sectorName: company.nace_main ? getNaceDescription(company.nace_main, lang as 'fr' | 'nl' | 'en') : null,
+  postalCode: rawAddress?.postal_code ?? null,
+  cityName: lang === 'nl' ? rawAddress?.city_nl : rawAddress?.city_fr,
+};
 
 const transformedAddress = rawAddress
   ? {
@@ -98,5 +113,5 @@ const companyData = {
 ---
 
 <Layout title={`${company.name} | FirmaCheck`} lang={lang}>
-  <CompanyPage company={companyData} lang={lang} />
+  <CompanyPage company={companyData} lang={lang} related={relatedData} />
 </Layout>

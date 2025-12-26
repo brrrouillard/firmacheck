@@ -22,7 +22,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     identity: {
       address: 'Adresse',
       showOnMap: 'Voir sur Google Maps',
-      foundedIn: 'Fondée en',
+      foundedIn: 'Fondée le',
       yearsOld: 'ans',
       contact: 'Contact',
       noAddress: 'Adresse non disponible',
@@ -54,6 +54,11 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       viewOnKbo: 'Voir sur KBO-BCE',
       viewOnNbb: 'Voir sur BNB',
     },
+    related: {
+      similarIn: 'Entreprises similaires en',
+      neighborsIn: 'Entreprises à',
+      thisSector: 'ce secteur',
+    },
   },
   nl: {
     header: {
@@ -72,7 +77,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     identity: {
       address: 'Adres',
       showOnMap: 'Bekijk op Google Maps',
-      foundedIn: 'Opgericht in',
+      foundedIn: 'Opgericht op',
       yearsOld: 'jaar',
       contact: 'Contact',
       noAddress: 'Adres niet beschikbaar',
@@ -104,6 +109,11 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       viewOnKbo: 'Bekijk op KBO-BCE',
       viewOnNbb: 'Bekijk op NBB',
     },
+    related: {
+      similarIn: 'Vergelijkbare bedrijven in',
+      neighborsIn: 'Bedrijven in',
+      thisSector: 'deze sector',
+    },
   },
   en: {
     header: {
@@ -122,7 +132,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     identity: {
       address: 'Address',
       showOnMap: 'View on Google Maps',
-      foundedIn: 'Founded in',
+      foundedIn: 'Founded on',
       yearsOld: 'years',
       contact: 'Contact',
       noAddress: 'Address not available',
@@ -153,6 +163,11 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       yesterday: 'yesterday',
       viewOnKbo: 'View on KBO-BCE',
       viewOnNbb: 'View on NBB',
+    },
+    related: {
+      similarIn: 'Similar companies in',
+      neighborsIn: 'Companies in',
+      thisSector: 'this sector',
     },
   },
 };

@@ -1,0 +1,30 @@
+---
+/**
+ * Company Link Card
+ *
+ * Minimal card linking to a related company.
+ * Shows company name and city.
+ */
+
+import type { RelatedCompany } from '@/lib/queries/related-companies';
+
+interface Props {
+  company: RelatedCompany;
+  lang: string;
+}
+
+const { company, lang } = Astro.props;
+const url = `/${lang}/${company.vat_number}/${company.slug}`;
+---
+
+<a
+  href={url}
+  class="group block rounded-lg border border-border bg-card p-4 transition-colors hover:bg-muted/50"
+>
+  <p class="font-medium text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+    {company.name}
+  </p>
+  {company.city && (
+    <p class="text-xs text-muted-foreground mt-1.5">{company.city}</p>
+  )}
+</a>

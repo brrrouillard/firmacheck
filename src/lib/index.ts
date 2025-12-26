@@ -32,3 +32,10 @@ export {
   type CompanyStatus,
   type FinancialSummary,
 } from './db';
+
+// Queries
+export {
+  fetchSimilarCompanies,
+  fetchNeighborCompanies,
+  type RelatedCompany,
+} from './queries';
