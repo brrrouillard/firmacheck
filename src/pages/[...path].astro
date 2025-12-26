@@ -116,8 +116,35 @@ const legalFormPart = company.legal_form ? ` (${company.legal_form})` : '';
 const cityPart = transformedAddress?.city ? ` - ${transformedAddress.city}` : '';
 const vatPart = ` (BE ${company.vat_number})`;
 const pageTitle = `${company.name}${legalFormPart}${cityPart}${vatPart} | FirmaCheck`;
+
+// Build SEO meta description based on data richness
+const financials = company.financial_summary as FinancialSummary | null;
+const statusText = company.status === 'active' ? 'Active' : 'Stopped';
+
+const formatCompact = (value: number): string => {
+  if (value >= 1_000_000) return `€${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `€${(value / 1_000).toFixed(0)}k`;
+  return `€${value}`;
+};
+
+let pageDescription: string;
+if (financials?.turnover) {
+  // Rich data template
+  const turnoverText = `Turnover ${financials.year || ''}: ${formatCompact(financials.turnover)}`;
+  const profitText = financials.profit_loss !== undefined
+    ? `. Profit: ${formatCompact(financials.profit_loss)}`
+    : '';
+  pageDescription = `Financial report for ${company.name} (BE ${company.vat_number}). ${turnoverText}${profitText}. Check solvency, liquidity, and download annual accounts.`;
+} else {
+  // Basic data template
+  const locationText = transformedAddress?.city
+    ? ` in ${transformedAddress.city}${rawAddress?.postal_code ? ` (${rawAddress.postal_code})` : ''}`
+    : '';
+  const legalText = company.legal_form ? ` ${company.legal_form}` : '';
+  pageDescription = `${company.name}${legalText}${locationText}. VAT BE ${company.vat_number}. Status: ${statusText}. View address, contact info, and official publications on FirmaCheck.`;
+}
 ---
 
-<Layout title={pageTitle} lang={lang}>
+<Layout title={pageTitle} description={pageDescription} lang={lang}>
   <CompanyPage company={companyData} lang={lang} related={relatedData} />
 </Layout>
