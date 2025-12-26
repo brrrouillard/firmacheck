@@ -110,8 +110,14 @@ const companyData = {
   financial_summary: company.financial_summary as FinancialSummary | null,
   updated_at: company.updated_at,
 };
+
+// Build SEO title: "Company Name (SRL) - City (BE 0123.456.789) | FirmaCheck"
+const legalFormPart = company.legal_form ? ` (${company.legal_form})` : '';
+const cityPart = transformedAddress?.city ? ` - ${transformedAddress.city}` : '';
+const vatPart = ` (${formatVat(company.vat_number)})`;
+const pageTitle = `${company.name}${legalFormPart}${cityPart}${vatPart} | FirmaCheck`;
 ---
 
-<Layout title={`${company.name} | FirmaCheck`} lang={lang}>
+<Layout title={pageTitle} lang={lang}>
   <CompanyPage company={companyData} lang={lang} related={relatedData} />
 </Layout>
