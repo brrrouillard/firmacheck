@@ -17,7 +17,9 @@ declare namespace App {
 }
 
 interface Env {
-  // Add Cloudflare bindings here when configured
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
+  // Add other Cloudflare bindings here when configured
   // DB: D1Database;
   // KV: KVNamespace;
 }

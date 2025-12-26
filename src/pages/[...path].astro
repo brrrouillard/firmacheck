@@ -36,8 +36,11 @@ if (!normalizedVat) {
   return new Response('Invalid VAT number', { status: 400 });
 }
 
+// Get Cloudflare runtime env if available
+const runtimeEnv = (Astro.locals as { runtime?: { env?: Record<string, string> } })?.runtime?.env;
+
 // Fetch company with related data in a single query
-const supabase = getSupabase();
+const supabase = getSupabase(runtimeEnv);
 const { data: result, error } = await supabase.rpc('get_company_with_related', {
   p_vat_number: normalizedVat,
   p_lang: lang,

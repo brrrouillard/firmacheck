@@ -12,7 +12,7 @@ export interface SearchResult {
   status: 'active';
 }
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, locals }) => {
   const query = url.searchParams.get('q')?.trim();
   const lang = url.searchParams.get('lang') || 'fr';
 
@@ -24,7 +24,9 @@ export const GET: APIRoute = async ({ url }) => {
     });
   }
 
-  const supabase = getSupabase();
+  // Get Cloudflare runtime env if available
+  const runtimeEnv = (locals as { runtime?: { env?: Record<string, string> } })?.runtime?.env;
+  const supabase = getSupabase(runtimeEnv);
 
   // Use optimized RPC function for search
   const { data, error } = await supabase.rpc('search_companies', {

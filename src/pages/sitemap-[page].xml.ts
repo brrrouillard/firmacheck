@@ -16,14 +16,16 @@ import { getSupabase } from '@/lib';
 const COMPANIES_PER_SITEMAP = 10000;
 const MAX_SITEMAPS = 5; // 5 sitemaps × 10k = 50k top companies
 
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   const page = parseInt(params.page || '1', 10);
 
   if (isNaN(page) || page < 1 || page > MAX_SITEMAPS) {
     return new Response('Sitemap not found', { status: 404 });
   }
 
-  const supabase = getSupabase();
+  // Get Cloudflare runtime env if available
+  const runtimeEnv = (locals as { runtime?: { env?: Record<string, string> } })?.runtime?.env;
+  const supabase = getSupabase(runtimeEnv);
   const offset = (page - 1) * COMPANIES_PER_SITEMAP;
 
   // Fetch TOP companies ordered by importance
