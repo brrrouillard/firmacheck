@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getSupabase } from '@/lib/db/client';
 
-// SSR route - do not prerender
+// SSR API route - do not prerender
 export const prerender = false;
 
 export interface SearchResult {
