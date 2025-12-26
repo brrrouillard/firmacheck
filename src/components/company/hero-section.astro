@@ -1,0 +1,61 @@
+---
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/copy-button';
+import { Building2, Bell, FileDown } from 'lucide-react';
+import { getJuridicalSituationLabel, getJuridicalSituationColor } from '@/lib/data/juridical-situations';
+import { t } from '@/lib/i18n/translations';
+import type { JuridicalSituation } from '@/lib/db/types';
+import type { SupportedLang } from '@/lib/i18n/translations';
+
+interface Props {
+  name: string;
+  formattedVat: string;
+  vatNumber: string;
+  juridicalSituation: JuridicalSituation;
+  status: 'active' | 'stopped';
+  lang: string;
+}
+
+const { name, formattedVat, vatNumber, juridicalSituation, status, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+const situationLabel = getJuridicalSituationLabel(juridicalSituation, typedLang);
+const situationColorClass = getJuridicalSituationColor(juridicalSituation);
+---
+
+<section class="border-b border-border bg-card">
+  <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <!-- Company Info -->
+      <div class="flex items-start gap-4">
+        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+          <Building2 className="h-7 w-7 text-primary" />
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold tracking-tight sm:text-3xl truncate">{name}</h1>
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1">
+              <span class="font-mono text-sm text-muted-foreground">{formattedVat}</span>
+              <CopyButton value={formattedVat} label="VAT number" client:load />
+            </div>
+            <Badge className={situationColorClass}>
+              {situationLabel}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2 shrink-0">
+        <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
+          <Bell className="mr-1.5 h-4 w-4" />
+          <span class="hidden sm:inline">{t(typedLang, 'hero', 'trackCompany')}</span>
+        </Button>
+        <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
+          <FileDown className="mr-1.5 h-4 w-4" />
+          <span class="hidden sm:inline">{t(typedLang, 'hero', 'downloadReport')}</span>
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>

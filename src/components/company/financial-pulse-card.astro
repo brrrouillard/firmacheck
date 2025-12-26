@@ -1,0 +1,110 @@
+---
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown, Users, FileQuestion } from 'lucide-react';
+import { t } from '@/lib/i18n/translations';
+import type { SupportedLang } from '@/lib/i18n/translations';
+
+interface Props {
+  financialSummary: {
+    year?: number;
+    turnover?: number;
+    profit_loss?: number;
+    employees?: number;
+    gross_margin?: number;
+    net_margin?: number;
+    equity?: number;
+  } | null;
+  lang: string;
+}
+
+const { financialSummary, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+
+const formatCurrency = (value?: number) => {
+  if (value === undefined || value === null) return null;
+  const locale = typedLang === 'nl' ? 'nl-BE' : 'fr-BE';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+// Check if we have any meaningful financial data to display
+const hasData = financialSummary && (
+  financialSummary.turnover !== undefined ||
+  financialSummary.profit_loss !== undefined ||
+  financialSummary.employees !== undefined
+);
+
+const profitLoss = financialSummary?.profit_loss;
+const isProfit = profitLoss !== undefined && profitLoss >= 0;
+---
+
+<Card className="h-full">
+  <CardHeader className="pb-3">
+    <div class="flex items-center justify-between gap-2">
+      <CardTitle className="text-base font-medium">{t(typedLang, 'snapshot', 'financialPulse')}</CardTitle>
+      {financialSummary?.year && (
+        <Badge variant="secondary" className="text-xs font-normal">
+          {financialSummary.year}
+        </Badge>
+      )}
+    </div>
+  </CardHeader>
+  <CardContent>
+    {hasData ? (
+      <div class="space-y-3">
+        {/* Turnover */}
+        {financialSummary.turnover !== undefined && (
+          <div>
+            <p class="text-xs text-muted-foreground">{t(typedLang, 'financials', 'turnover')}</p>
+            <p class="text-lg font-semibold">{formatCurrency(financialSummary.turnover)}</p>
+          </div>
+        )}
+
+        {/* Profit/Loss */}
+        {profitLoss !== undefined && (
+          <div>
+            <p class="text-xs text-muted-foreground">{t(typedLang, 'financials', 'netProfit')}</p>
+            <div class="flex items-center gap-1.5">
+              {isProfit ? (
+                <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+              )}
+              <p class={`text-lg font-semibold ${
+                isProfit
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
+              }`}>
+                {formatCurrency(profitLoss)}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Employees */}
+        {financialSummary.employees !== undefined && (
+          <div class="flex items-center gap-2 pt-1">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span class="text-sm">
+              {financialSummary.employees} {t(typedLang, 'financials', 'employees')}
+            </span>
+          </div>
+        )}
+      </div>
+    ) : (
+      <div class="flex flex-col items-center justify-center py-4 text-center">
+        <FileQuestion className="h-8 w-8 text-muted-foreground mb-2" />
+        <p class="text-sm font-medium text-muted-foreground">
+          {t(typedLang, 'financials', 'noData')}
+        </p>
+        <p class="text-xs text-muted-foreground mt-1">
+          {t(typedLang, 'financials', 'noDataDescription')}
+        </p>
+      </div>
+    )}
+  </CardContent>
+</Card>

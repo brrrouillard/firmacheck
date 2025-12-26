@@ -6,6 +6,7 @@ import Layout from '@/layouts/Layout.astro';
 import '@/styles/global.css';
 import CompanyPage from '@/components/company-page.astro';
 import { getSupabase, normalizeVat, formatVat, slugifyCompanyName } from '@/lib';
+import type { JuridicalSituation, CompanyContact, FinancialSummary } from '@/lib/db/types';
 
 // Supported languages
 const SUPPORTED_LANGS = ['fr', 'nl', 'en'] as const;
@@ -54,6 +55,29 @@ if (slug !== canonicalSlug) {
   return Astro.redirect(`/${lang}/${normalizedVat}/${canonicalSlug}`, 301);
 }
 
+// Transform address to use language-specific fields
+const rawAddress = company.address as {
+  street_fr?: string;
+  street_nl?: string;
+  number?: string;
+  box?: string;
+  postal_code?: string;
+  city_fr?: string;
+  city_nl?: string;
+  country?: string;
+} | null;
+
+const transformedAddress = rawAddress
+  ? {
+      street: lang === 'nl' ? rawAddress.street_nl : rawAddress.street_fr,
+      number: rawAddress.number,
+      box: rawAddress.box,
+      postal_code: rawAddress.postal_code,
+      city: lang === 'nl' ? rawAddress.city_nl : rawAddress.city_fr,
+      country: rawAddress.country,
+    }
+  : null;
+
 // Prepare company data for the component
 const companyData = {
   name: company.name,
@@ -62,26 +86,13 @@ const companyData = {
   slug: company.slug,
   legal_form: company.legal_form,
   status: company.status as 'active' | 'stopped',
-  address: company.address as {
-    street?: string;
-    number?: string;
-    box?: string;
-    postal_code?: string;
-    city?: string;
-    country?: string;
-  } | null,
-  email: (company as any).email || null,
+  juridical_situation: company.juridical_situation as JuridicalSituation,
+  start_date: company.start_date,
+  address: transformedAddress,
+  contact: company.contact as CompanyContact | null,
   nace_codes: company.nace_codes,
-  nace_labels: (company as any).nace_labels || null,
-  financial_summary: company.financial_summary as {
-    year?: number;
-    turnover?: number;
-    profit_loss?: number;
-    equity?: number;
-    employees?: number;
-    gross_margin?: number;
-    net_margin?: number;
-  } | null,
+  nace_main: company.nace_main,
+  financial_summary: company.financial_summary as FinancialSummary | null,
   updated_at: company.updated_at,
 };
 ---

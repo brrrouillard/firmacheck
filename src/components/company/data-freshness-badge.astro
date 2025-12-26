@@ -1,0 +1,29 @@
+---
+import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
+import { formatDaysAgo } from '@/lib/i18n/translations';
+import type { SupportedLang } from '@/lib/i18n/translations';
+
+interface Props {
+  updatedAt: string;
+  lang: string;
+}
+
+const { updatedAt, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+
+const calculateDaysAgo = (dateStr: string) => {
+  const updated = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - updated.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+};
+
+const daysAgo = calculateDaysAgo(updatedAt);
+const formattedDate = formatDaysAgo(daysAgo, typedLang);
+---
+
+<Badge variant="outline" className="gap-1.5 font-normal">
+  <Clock className="h-3 w-3" />
+  {formattedDate}
+</Badge>

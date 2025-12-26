@@ -1,0 +1,63 @@
+---
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Briefcase, Factory } from 'lucide-react';
+import { getNaceDescription } from '@/lib/data/nace-codes';
+import { t } from '@/lib/i18n/translations';
+import type { SupportedLang } from '@/lib/i18n/translations';
+
+interface Props {
+  naceMain: string | null;
+  naceCodes: string[] | null;
+  legalForm: string | null;
+  lang: string;
+}
+
+const { naceMain, naceCodes, legalForm, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+const mainNaceDescription = naceMain ? getNaceDescription(naceMain, typedLang) : null;
+const otherActivitiesCount = naceCodes && naceCodes.length > 1 ? naceCodes.length - 1 : 0;
+---
+
+<Card className="h-full">
+  <CardHeader className="pb-3">
+    <CardTitle className="text-base font-medium">{t(typedLang, 'snapshot', 'activity')}</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    {/* Main NACE Activity */}
+    {naceMain ? (
+      <div class="flex items-start gap-3">
+        <Factory className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+        <div class="min-w-0">
+          <p class="text-xs text-muted-foreground">{t(typedLang, 'activity', 'mainActivity')}</p>
+          <p class="text-sm font-medium font-mono">{naceMain}</p>
+          {mainNaceDescription && (
+            <p class="text-sm text-muted-foreground leading-relaxed">{mainNaceDescription}</p>
+          )}
+        </div>
+      </div>
+    ) : (
+      <div class="flex items-center gap-3 text-muted-foreground">
+        <Factory className="h-4 w-4 shrink-0" />
+        <span class="text-sm">{t(typedLang, 'activity', 'noActivity')}</span>
+      </div>
+    )}
+
+    {/* Legal Form */}
+    {legalForm && (
+      <div class="flex items-start gap-3">
+        <Briefcase className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+        <div class="min-w-0">
+          <p class="text-xs text-muted-foreground">{t(typedLang, 'activity', 'legalForm')}</p>
+          <p class="text-sm font-medium">{legalForm}</p>
+        </div>
+      </div>
+    )}
+
+    {/* Other activities count */}
+    {otherActivitiesCount > 0 && (
+      <p class="text-xs text-muted-foreground pl-7">
+        +{otherActivitiesCount} {t(typedLang, 'activity', 'otherActivities')}
+      </p>
+    )}
+  </CardContent>
+</Card>

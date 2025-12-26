@@ -1,0 +1,134 @@
+---
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Calendar, Mail, Phone, Globe } from 'lucide-react';
+import { t } from '@/lib/i18n/translations';
+import type { SupportedLang } from '@/lib/i18n/translations';
+
+interface Props {
+  address: {
+    street?: string;
+    number?: string;
+    box?: string;
+    postal_code?: string;
+    city?: string;
+  } | null;
+  startDate: string | null;
+  contact: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  } | null;
+  lang: string;
+}
+
+const { address, startDate, contact, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+
+// Calculate company age
+const calculateAge = (dateStr: string | null) => {
+  if (!dateStr) return null;
+  const start = new Date(dateStr);
+  const now = new Date();
+  return now.getFullYear() - start.getFullYear();
+};
+
+const age = calculateAge(startDate);
+const foundedYear = startDate ? new Date(startDate).getFullYear() : null;
+
+// Format address
+const addressParts = [];
+if (address?.street) {
+  let street = address.street;
+  if (address.number) street += ` ${address.number}`;
+  if (address.box) street += ` bte ${address.box}`;
+  addressParts.push(street);
+}
+if (address?.postal_code || address?.city) {
+  addressParts.push(`${address.postal_code || ''} ${address.city || ''}`.trim());
+}
+const fullAddress = addressParts.join(', ');
+
+const mapsUrl = fullAddress
+  ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+  : null;
+
+// Format website URL
+const formatWebsite = (url?: string) => {
+  if (!url) return null;
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+};
+---
+
+<Card className="h-full">
+  <CardHeader className="pb-3">
+    <CardTitle className="text-base font-medium">{t(typedLang, 'snapshot', 'identity')}</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-3">
+    {/* Address */}
+    {address && fullAddress ? (
+      <div class="flex items-start gap-3">
+        <MapPin className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
+        {mapsUrl ? (
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-sm leading-relaxed text-primary hover:underline"
+          >
+            {fullAddress}
+          </a>
+        ) : (
+          <p class="text-sm leading-relaxed">{fullAddress}</p>
+        )}
+      </div>
+    ) : (
+      <div class="flex items-center gap-3 text-muted-foreground">
+        <MapPin className="h-4 w-4 shrink-0" />
+        <span class="text-sm">{t(typedLang, 'identity', 'noAddress')}</span>
+      </div>
+    )}
+
+    {/* Founded / Age */}
+    {foundedYear && age !== null && (
+      <div class="flex items-center gap-3">
+        <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span class="text-sm">
+          {t(typedLang, 'identity', 'foundedIn')} {foundedYear} ({age} {t(typedLang, 'identity', 'yearsOld')})
+        </span>
+      </div>
+    )}
+
+    {/* Contact Info */}
+    {contact?.phone && (
+      <div class="flex items-center gap-3">
+        <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+        <a href={`tel:${contact.phone}`} class="text-sm text-primary hover:underline">
+          {contact.phone}
+        </a>
+      </div>
+    )}
+
+    {contact?.email && (
+      <div class="flex items-center gap-3">
+        <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+        <a href={`mailto:${contact.email}`} class="text-sm text-primary hover:underline truncate">
+          {contact.email}
+        </a>
+      </div>
+    )}
+
+    {contact?.website && (
+      <div class="flex items-center gap-3">
+        <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+        <a
+          href={contact.website.startsWith('http') ? contact.website : `https://${contact.website}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-sm text-primary hover:underline truncate"
+        >
+          {formatWebsite(contact.website)}
+        </a>
+      </div>
+    )}
+  </CardContent>
+</Card>
