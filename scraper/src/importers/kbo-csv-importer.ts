@@ -43,7 +43,7 @@ const LEGAL_FORM_MAP: Record<string, string> = {
   '419': 'Entreprise sociale', '420': 'Entreprise étrangère', '421': 'Association',
   '430': 'Org. interprofessionnel', '431': 'Consort. validation compétences',
   '432': 'Entreprise portefeuille',
-  '610': 'SA', '611': 'SCA', '612': 'SRL', '613': 'SPRL', '614': 'SC',
+  '610': 'SRL', '611': 'SCA', '612': 'SA', '613': 'SPRL', '614': 'SC',
   '615': 'SCRL', '616': 'SNC', '617': 'SCS', '618': 'GIE',
   '620': 'Fondation privée', '621': 'Fondation utilité publique',
   '627': 'AISBL', '628': 'Fondation', '629': 'ASBL', '630': 'ASBL',

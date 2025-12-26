@@ -26,8 +26,10 @@ bun run lint     # Run ESLint
 # Scraper (scraper/ directory)
 cd scraper
 bun run src/main.ts import-kbo --enterprise ./data/enterprise.csv --denomination ./data/denomination.csv --address ./data/address.csv --activity ./data/activity.csv
-bun run src/main.ts enrich-nbb --vat 0417497106  # Single company
-bun run src/main.ts enrich-nbb --limit 500       # Batch mode
+bun run src/main.ts enrich-nbb --vat 0417497106       # NBB financial data
+bun run src/main.ts enrich-nbb --older-than 60 --limit 500
+bun run src/main.ts enrich-kbo --vat 1008195927       # KBO directors/functions
+bun run src/main.ts enrich-kbo --limit 100            # Batch mode
 ```
 
 ## Environment Variables
@@ -84,8 +86,11 @@ URL pattern: `/{lang}/{vat}/{slug}` (e.g., `/fr/0123456789/company-name`)
 
 Separate Bun project for data import and enrichment. Uses Crawlee + Playwright for web scraping.
 
-- `import-kbo` - Imports company data from KBO Open Data CSV files
-- `enrich-nbb` - Enriches companies with financial data from NBB (National Bank of Belgium)
+| Command | Source | Data |
+|---------|--------|------|
+| `import-kbo` | KBO Open Data CSV files | Core company data (VAT, names, addresses, NACE codes) |
+| `enrich-nbb` | NBB website | Financial statements, annual accounts |
+| `enrich-kbo` | KBO public portal | Directors, functions, capital, fiscal info, entity links |
 
 ## KBO Data Import
 
@@ -169,6 +174,17 @@ nace_codes TEXT[],                     -- All NACE 2008 activity codes
 nace_main VARCHAR(10),                 -- Primary activity code
 establishment_count INT,               -- Number of branches
 financial_summary JSONB,               -- NBB enrichment data
+
+-- KBO enrichment fields (from enrich-kbo command)
+capital DECIMAL(18,2),                 -- Share capital in EUR
+fiscal_year_end VARCHAR(10),           -- e.g., "31 December"
+annual_meeting_month VARCHAR(20),
+juridical_situation_date DATE,
+entity_links JSONB,                    -- [{type, vat_number, name, start_date, end_date}]
+qualifications JSONB,                  -- [{type, start_date, end_date}] (RSZ, VAT subject, etc.)
+nace_history JSONB,                    -- {2025: [...], 2008: [...], 2003: [...]}
+functions JSONB,                       -- Directors/managers with roles and dates
+kbo_enriched_at TIMESTAMPTZ,           -- Last KBO portal enrichment timestamp
 ```
 
 ### Import Statistics (December 2024)

@@ -1,0 +1,266 @@
+---
+// SSR route - do not prerender
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import '@/styles/global.css';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Database, Building2, Landmark, ExternalLink } from 'lucide-react';
+
+const SUPPORTED_LANGS = ['fr', 'nl', 'en'] as const;
+type Lang = (typeof SUPPORTED_LANGS)[number];
+
+const { lang } = Astro.params;
+
+// Validate language, redirect to French if invalid
+if (!lang || !SUPPORTED_LANGS.includes(lang as Lang)) {
+  return Astro.redirect('/fr/data-sources', 302);
+}
+
+const typedLang = lang as Lang;
+
+const content = {
+  fr: {
+    title: 'Sources des données | FirmaCheck',
+    description: 'Découvrez les sources de données officielles utilisées par FirmaCheck pour les informations sur les entreprises belges.',
+    heading: 'Nos sources de données',
+    intro: 'FirmaCheck utilise exclusivement des sources de données officielles et publiques pour garantir la fiabilité et l\'exactitude des informations sur les entreprises belges.',
+    kbo: {
+      name: 'KBO Open Data',
+      fullName: 'Banque-Carrefour des Entreprises',
+      description: 'La source officielle des données d\'enregistrement des entreprises belges, gérée par le SPF Économie.',
+      data: [
+        'Numéros de TVA et identification',
+        'Noms et dénominations commerciales',
+        'Adresses du siège social',
+        'Codes NACE (activités économiques)',
+        'Formes juridiques',
+        'Dates de création et statut',
+      ],
+      license: 'Open Data - Utilisation libre',
+      update: 'Mise à jour mensuelle',
+    },
+    nbb: {
+      name: 'Banque Nationale de Belgique',
+      fullName: 'Centrale des Bilans',
+      description: 'La centrale des bilans de la BNB fournit les comptes annuels déposés par les entreprises belges.',
+      data: [
+        'Chiffre d\'affaires',
+        'Résultat net (bénéfice/perte)',
+        'Capitaux propres',
+        'Total du bilan',
+        'Marges brutes et nettes',
+        'Ratios financiers',
+      ],
+      license: 'Données publiques',
+      update: 'Selon dépôt des comptes annuels',
+    },
+    transparency: {
+      title: 'Notre engagement',
+      text: 'Nous nous engageons à fournir des informations transparentes et vérifiables. Toutes les données affichées sur FirmaCheck proviennent de sources officielles et sont mises à jour régulièrement.',
+    },
+  },
+  nl: {
+    title: 'Gegevensbronnen | FirmaCheck',
+    description: 'Ontdek de officiële gegevensbronnen die FirmaCheck gebruikt voor Belgische bedrijfsinformatie.',
+    heading: 'Onze gegevensbronnen',
+    intro: 'FirmaCheck maakt uitsluitend gebruik van officiële en openbare gegevensbronnen om de betrouwbaarheid en nauwkeurigheid van de informatie over Belgische bedrijven te garanderen.',
+    kbo: {
+      name: 'KBO Open Data',
+      fullName: 'Kruispuntbank van Ondernemingen',
+      description: 'De officiële bron van registratiegegevens voor Belgische ondernemingen, beheerd door de FOD Economie.',
+      data: [
+        'BTW-nummers en identificatie',
+        'Namen en handelsnamen',
+        'Adressen van maatschappelijke zetel',
+        'NACE-codes (economische activiteiten)',
+        'Rechtsvormen',
+        'Oprichtingsdata en status',
+      ],
+      license: 'Open Data - Vrij gebruik',
+      update: 'Maandelijkse update',
+    },
+    nbb: {
+      name: 'Nationale Bank van België',
+      fullName: 'Balanscentrale',
+      description: 'De Balanscentrale van de NBB levert de jaarrekeningen die door Belgische bedrijven zijn neergelegd.',
+      data: [
+        'Omzet',
+        'Nettoresultaat (winst/verlies)',
+        'Eigen vermogen',
+        'Balanstotaal',
+        'Bruto- en nettomarges',
+        'Financiële ratio\'s',
+      ],
+      license: 'Openbare gegevens',
+      update: 'Volgens neerlegging jaarrekeningen',
+    },
+    transparency: {
+      title: 'Onze verbintenis',
+      text: 'Wij verbinden ons ertoe transparante en verifieerbare informatie te verstrekken. Alle gegevens op FirmaCheck zijn afkomstig van officiële bronnen en worden regelmatig bijgewerkt.',
+    },
+  },
+  en: {
+    title: 'Data Sources | FirmaCheck',
+    description: 'Discover the official data sources used by FirmaCheck for Belgian company information.',
+    heading: 'Our Data Sources',
+    intro: 'FirmaCheck exclusively uses official and public data sources to ensure the reliability and accuracy of Belgian company information.',
+    kbo: {
+      name: 'KBO Open Data',
+      fullName: 'Crossroads Bank for Enterprises',
+      description: 'The official source of Belgian company registration data, managed by the FPS Economy.',
+      data: [
+        'VAT numbers and identification',
+        'Names and trade names',
+        'Registered office addresses',
+        'NACE codes (economic activities)',
+        'Legal forms',
+        'Start dates and status',
+      ],
+      license: 'Open Data - Free use',
+      update: 'Monthly update',
+    },
+    nbb: {
+      name: 'National Bank of Belgium',
+      fullName: 'Central Balance Sheet Office',
+      description: 'The NBB\'s Central Balance Sheet Office provides annual accounts filed by Belgian companies.',
+      data: [
+        'Turnover',
+        'Net result (profit/loss)',
+        'Equity',
+        'Total assets',
+        'Gross and net margins',
+        'Financial ratios',
+      ],
+      license: 'Public data',
+      update: 'As annual accounts are filed',
+    },
+    transparency: {
+      title: 'Our Commitment',
+      text: 'We are committed to providing transparent and verifiable information. All data displayed on FirmaCheck comes from official sources and is regularly updated.',
+    },
+  },
+};
+
+const t = content[typedLang];
+---
+
+<Layout title={t.title} description={t.description} lang={typedLang}>
+  <div class="min-h-screen bg-background">
+    <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="flex justify-center mb-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <Database className="h-8 w-8 text-primary" />
+          </div>
+        </div>
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{t.heading}</h1>
+        <p class="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          {t.intro}
+        </p>
+      </div>
+
+      <div class="space-y-8">
+        <!-- KBO Open Data -->
+        <Card>
+          <CardHeader>
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                <Building2 className="h-6 w-6 text-blue-600" />
+              </div>
+              <div class="flex-1">
+                <CardTitle className="text-xl">{t.kbo.name}</CardTitle>
+                <p class="text-sm text-muted-foreground mt-1">{t.kbo.fullName}</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground mb-4">{t.kbo.description}</p>
+
+            <div class="mb-4">
+              <h4 class="font-medium mb-2">Data provided:</h4>
+              <ul class="grid gap-1.5 sm:grid-cols-2">
+                {t.kbo.data.map((item) => (
+                  <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-sm pt-4 border-t border-border">
+              <span class="text-muted-foreground">
+                <strong>License:</strong> {t.kbo.license}
+              </span>
+              <span class="text-muted-foreground">
+                <strong>Update:</strong> {t.kbo.update}
+              </span>
+              <a
+                href="https://kbopub.economie.fgov.be/kbo-open-data/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-primary hover:underline ml-auto"
+              >
+                Visit source <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- NBB -->
+        <Card>
+          <CardHeader>
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                <Landmark className="h-6 w-6 text-amber-600" />
+              </div>
+              <div class="flex-1">
+                <CardTitle className="text-xl">{t.nbb.name}</CardTitle>
+                <p class="text-sm text-muted-foreground mt-1">{t.nbb.fullName}</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground mb-4">{t.nbb.description}</p>
+
+            <div class="mb-4">
+              <h4 class="font-medium mb-2">Data provided:</h4>
+              <ul class="grid gap-1.5 sm:grid-cols-2">
+                {t.nbb.data.map((item) => (
+                  <li class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-sm pt-4 border-t border-border">
+              <span class="text-muted-foreground">
+                <strong>License:</strong> {t.nbb.license}
+              </span>
+              <span class="text-muted-foreground">
+                <strong>Update:</strong> {t.nbb.update}
+              </span>
+              <a
+                href="https://www.nbb.be/en/central-balance-sheet-office"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-primary hover:underline ml-auto"
+              >
+                Visit source <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
+        <!-- Transparency Note -->
+        <div class="rounded-lg border border-border bg-muted/30 p-6 text-center">
+          <h3 class="font-semibold text-lg mb-2">{t.transparency.title}</h3>
+          <p class="text-muted-foreground">{t.transparency.text}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
