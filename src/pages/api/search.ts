@@ -37,7 +37,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
   if (error) {
     console.error('Search error:', error);
-    return new Response(JSON.stringify({ error: 'Database error' }), {
+    return new Response(JSON.stringify({
+      error: 'Database error',
+      details: error.message,
+      code: error.code,
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
