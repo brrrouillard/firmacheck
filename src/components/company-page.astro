@@ -14,6 +14,7 @@ import SnapshotGrid from './company/snapshot-grid.astro';
 import IdentityCard from './company/identity-card.astro';
 import ActivityCard from './company/activity-card.astro';
 import FinancialPulseCard from './company/financial-pulse-card.astro';
+import FaqSection from './company/faq-section.astro';
 import RelatedCompanies from './company/related-companies.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -193,6 +194,17 @@ const formatCurrency = (value?: number) => {
     </section>
   )}
 
+  <!-- FAQ Section -->
+  <FaqSection
+    companyName={company.name}
+    vatNumber={company.vat_number}
+    formattedVat={company.formatted_vat || company.vat_number}
+    startDate={company.start_date}
+    address={company.address}
+    financialSummary={company.financial_summary}
+    lang={lang}
+  />
+
   <!-- Related Companies -->
   <RelatedCompanies
     similar={related.similar}
@@ -209,7 +221,7 @@ const formatCurrency = (value?: number) => {
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       <div class="flex justify-end gap-4">
         <a
-          href={`https://kbo-bce.be/${typedLang === 'nl' ? 'nl' : 'fr'}/zoeken?q=${company.vat_number}`}
+          href={`https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?nummer=${company.vat_number}&actionLu=Recherche`}
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -218,7 +230,7 @@ const formatCurrency = (value?: number) => {
           <ExternalLink className="h-3 w-3" />
         </a>
         <a
-          href={`https://cri.nbb.be/bc9/web/catalog?lang=${typedLang === 'nl' ? 'N' : 'F'}&companyNr=${company.vat_number}`}
+          href={`https://consult.cbso.nbb.be/consult-enterprise/${company.vat_number}`}
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
