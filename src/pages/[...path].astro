@@ -143,8 +143,46 @@ if (financials?.turnover) {
   const legalText = company.legal_form ? ` ${company.legal_form}` : '';
   pageDescription = `${company.name}${legalText}${locationText}. VAT BE ${company.vat_number}. Status: ${statusText}. View address, contact info, and official publications on FirmaCheck.`;
 }
+
+// SEO: Canonical URL and alternate languages
+const siteUrl = 'https://firmacheck.be';
+const canonicalUrl = `${siteUrl}/${lang}/${company.vat_number}/${company.slug}`;
+const alternateUrls = [
+  { lang: 'fr', url: `${siteUrl}/fr/${company.vat_number}/${company.slug}` },
+  { lang: 'nl', url: `${siteUrl}/nl/${company.vat_number}/${company.slug}` },
+  { lang: 'en', url: `${siteUrl}/en/${company.vat_number}/${company.slug}` },
+];
+
+// SEO: JSON-LD structured data (Organization schema)
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: company.name,
+  legalName: company.name,
+  taxID: `BE ${company.vat_number}`,
+  ...(transformedAddress && {
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: [transformedAddress.street, transformedAddress.number, transformedAddress.box].filter(Boolean).join(' '),
+      postalCode: transformedAddress.postal_code,
+      addressLocality: transformedAddress.city,
+      addressCountry: 'BE',
+    },
+  }),
+  ...(company.contact?.phone && { telephone: company.contact.phone }),
+  ...(company.contact?.email && { email: company.contact.email }),
+  ...(company.contact?.website && { url: company.contact.website }),
+  ...(company.start_date && { foundingDate: company.start_date }),
+};
 ---
 
-<Layout title={pageTitle} description={pageDescription} lang={lang}>
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl={canonicalUrl}
+  alternateUrls={alternateUrls}
+  jsonLd={jsonLd}
+  lang={lang}
+>
   <CompanyPage company={companyData} lang={lang} related={relatedData} />
 </Layout>

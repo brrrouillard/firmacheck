@@ -1,0 +1,9 @@
+# FirmaCheck robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://firmacheck.be/sitemap-index.xml
+
+# Crawl-delay for politeness (optional)
+Crawl-delay: 1

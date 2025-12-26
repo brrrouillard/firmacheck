@@ -6,12 +6,19 @@ import type { SupportedLang } from "@/lib/i18n/translations";
 interface Props {
   title: string;
   description?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  jsonLd?: object;
+  alternateUrls?: { lang: string; url: string }[];
   lang?: string;
 }
 
-const { title, description, lang = 'fr' } = Astro.props;
+const { title, description, canonicalUrl, ogImage, jsonLd, alternateUrls, lang = 'fr' } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const searchPlaceholder = t(typedLang, 'header', 'searchPlaceholder');
+
+const siteUrl = 'https://firmacheck.be';
+const defaultOgImage = `${siteUrl}/og-image.png`;
 ---
 
 <!doctype html>
@@ -22,6 +29,37 @@ const searchPlaceholder = t(typedLang, 'header', 'searchPlaceholder');
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+
+    <!-- Canonical URL -->
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:image" content={ogImage || defaultOgImage} />
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    <meta property="og:site_name" content="FirmaCheck" />
+    <meta property="og:locale" content={typedLang === 'nl' ? 'nl_BE' : typedLang === 'en' ? 'en_GB' : 'fr_BE'} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImage || defaultOgImage} />
+
+    <!-- Alternate language versions (hreflang) -->
+    {alternateUrls?.map(({ lang: hrefLang, url }) => (
+      <link rel="alternate" hreflang={hrefLang} href={url} />
+    ))}
+    {alternateUrls && alternateUrls.length > 0 && (
+      <link rel="alternate" hreflang="x-default" href={alternateUrls.find(a => a.lang === 'fr')?.url || alternateUrls[0].url} />
+    )}
+
+    <!-- Structured Data (JSON-LD) -->
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
   </head>
   <body>
     <Header searchPlaceholder={searchPlaceholder} lang={typedLang} client:load />
