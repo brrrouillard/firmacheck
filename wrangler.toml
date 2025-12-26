@@ -6,4 +6,4 @@ pages_build_output_dir = "./dist"
 # Runtime environment variables for Cloudflare Pages
 [vars]
 SUPABASE_URL = "https://pzwlcmsgklbsfttajlog.supabase.co"
-SUPABASE_ANON_KEY = "sb_publishable_qjBY1TodgvOBKVB0s0hm1g_zVX9vEJo"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6d2xjbXNna2xic2Z0dGFqbG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MjcxNjgsImV4cCI6MjA2MTUwMzE2OH0.o-iS9rqbed2k-kC_hIjxn1vbL7P4xfLr1m1OjpeNehE"
