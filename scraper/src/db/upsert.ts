@@ -1,5 +1,14 @@
 import { getSupabase } from './client.js';
-import type { CompanyInsert, CompanyUpdate, FinancialSummary } from './types.js';
+import type {
+  CompanyInsert,
+  CompanyUpdate,
+  FinancialSummary,
+  CompanyFunction,
+  EntityLink,
+  Qualification,
+  NaceHistory,
+  FiscalPeriod,
+} from './types.js';
 import { logger } from '../utils/logger.js';
 
 export interface NbbFinancialData {
@@ -141,7 +150,7 @@ export async function batchUpdateContacts(
     });
 
     const results = await Promise.all(promises);
-    updated += results.reduce((a, b) => a + b, 0);
+    updated += results.reduce((a: number, b: number) => a + b, 0);
   }
 
   return updated;
@@ -172,14 +181,14 @@ export async function batchUpdateEstablishmentCounts(
     });
 
     const results = await Promise.all(promises);
-    updated += results.reduce((a, b) => a + b, 0);
+    updated += results.reduce((a: number, b: number) => a + b, 0);
   }
 
   return updated;
 }
 
 /**
- * Get companies that need financial enrichment
+ * Get companies that need financial enrichment (NBB)
  */
 export async function getCompaniesNeedingEnrichment(options: {
   limit?: number;
@@ -199,6 +208,101 @@ export async function getCompaniesNeedingEnrichment(options: {
 
   if (error) {
     logger.error({ error: error.message }, 'Failed to fetch companies needing enrichment');
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export interface KboEnrichmentData {
+  vatNumber: string;
+  functions: CompanyFunction[];
+  capital: number | null;
+  fiscalYearEnd: string | null;
+  annualMeetingMonth: string | null;
+  juridicalSituationDate: string | null;
+  entityLinks: EntityLink[];
+  qualifications: Qualification[];
+  naceHistory: NaceHistory;
+  exceptionalFiscalPeriods: FiscalPeriod[];
+}
+
+/**
+ * Enrich company with KBO data (functions, capital, qualifications, etc.)
+ */
+export async function enrichWithKbo(kboData: KboEnrichmentData): Promise<void> {
+  const supabase = getSupabase();
+
+  const update: CompanyUpdate = {
+    functions: kboData.functions,
+    last_kbo_enriched_at: new Date().toISOString(),
+  };
+
+  // Add optional fields only if they have values
+  if (kboData.capital !== null) {
+    update.capital = kboData.capital;
+  }
+  if (kboData.fiscalYearEnd) {
+    update.fiscal_year_end = kboData.fiscalYearEnd;
+  }
+  if (kboData.annualMeetingMonth) {
+    update.annual_meeting_month = kboData.annualMeetingMonth;
+  }
+  if (kboData.juridicalSituationDate) {
+    update.juridical_situation_date = kboData.juridicalSituationDate;
+  }
+  if (kboData.entityLinks.length > 0) {
+    update.entity_links = kboData.entityLinks;
+  }
+  if (kboData.qualifications.length > 0) {
+    update.qualifications = kboData.qualifications;
+  }
+  if (Object.keys(kboData.naceHistory).length > 0) {
+    update.nace_history = kboData.naceHistory;
+  }
+  if (kboData.exceptionalFiscalPeriods.length > 0) {
+    update.exceptional_fiscal_periods = kboData.exceptionalFiscalPeriods;
+  }
+
+  const { error } = await (supabase
+    .from('companies') as any)
+    .update(update)
+    .eq('vat_number', kboData.vatNumber);
+
+  if (error) {
+    logger.error({ vatNumber: kboData.vatNumber, error: error.message }, 'Failed to enrich with KBO data');
+    throw error;
+  }
+
+  logger.debug({
+    vatNumber: kboData.vatNumber,
+    functions: kboData.functions.length,
+    capital: kboData.capital,
+    qualifications: kboData.qualifications.length,
+  }, 'Enriched company with KBO data');
+}
+
+/**
+ * Get companies that need KBO enrichment (functions/directors)
+ */
+export async function getCompaniesNeedingKboEnrichment(options: {
+  limit?: number;
+  olderThanDays?: number;
+}): Promise<Array<{ vat_number: string }>> {
+  const supabase = getSupabase();
+  const { limit = 100, olderThanDays = 30 } = options;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+
+  const { data, error } = await supabase
+    .from('companies')
+    .select('vat_number')
+    .or(`last_kbo_enriched_at.is.null,last_kbo_enriched_at.lt.${cutoffDate.toISOString()}`)
+    .limit(limit);
+
+  if (error) {
+    logger.error({ error: error.message }, 'Failed to fetch companies needing KBO enrichment');
     throw error;
   }
 

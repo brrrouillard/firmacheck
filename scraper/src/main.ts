@@ -10,6 +10,7 @@ Usage:
 Commands:
   import-kbo    Import company data from KBO Open Data CSV files
   enrich-nbb    Enrich companies with financial data from NBB
+  enrich-kbo    Enrich companies with directors/functions from KBO portal
 
 Examples:
   # Full import with all data (active companies only)
@@ -42,6 +43,12 @@ Examples:
   # Enrich companies not updated in 60 days (limit 500)
   bun run src/main.ts enrich-nbb --older-than 60 --limit 500
 
+  # Enrich specific company with KBO directors data
+  bun run src/main.ts enrich-kbo --vat 1008195927
+
+  # Enrich companies without KBO data (limit 100)
+  bun run src/main.ts enrich-kbo --limit 100
+
 Options:
   --help          Show this help message
   --dry-run       Parse files without writing to database
@@ -64,6 +71,12 @@ interface ImportKboArgs {
 }
 
 interface EnrichNbbArgs {
+  vat?: string;
+  limit: number;
+  olderThan: number;
+}
+
+interface EnrichKboArgs {
   vat?: string;
   limit: number;
   olderThan: number;
@@ -171,6 +184,35 @@ async function runEnrichNbb(options: Record<string, string | boolean>, logger: a
   });
 }
 
+async function runEnrichKbo(options: Record<string, string | boolean>, logger: any): Promise<void> {
+  const { runKboEnrichment, runKboEnrichmentFromDb } = await import('./crawlers/kbo-crawler.js');
+  const args: EnrichKboArgs = {
+    vat: options['vat'] as string | undefined,
+    limit: parseInt(options['limit'] as string, 10) || 100,
+    olderThan: parseInt(options['older-than'] as string, 10) || 30,
+  };
+
+  // Single company mode
+  if (args.vat) {
+    const normalized = normalizeVat(args.vat);
+    if (!normalized || !isValidVat(normalized)) {
+      console.error(`Invalid VAT number: ${args.vat}`);
+      process.exit(1);
+    }
+
+    logger.info({ vatNumber: normalized }, 'Enriching single company with KBO data');
+    await runKboEnrichment([normalized]);
+    return;
+  }
+
+  // Batch mode from database
+  logger.info({ limit: args.limit, olderThanDays: args.olderThan }, 'Enriching companies with KBO data from database');
+  await runKboEnrichmentFromDb({
+    limit: args.limit,
+    olderThanDays: args.olderThan,
+  });
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const { command, options } = parseArgs(args);
@@ -202,6 +244,10 @@ async function main(): Promise<void> {
 
       case 'enrich-nbb':
         await runEnrichNbb(options, logger);
+        break;
+
+      case 'enrich-kbo':
+        await runEnrichKbo(options, logger);
         break;
 
       default:

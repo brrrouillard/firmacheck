@@ -72,6 +72,16 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       turnoverQuestion: 'Quel est le chiffre d\'affaires de {company} ?',
       turnoverAnswer: 'Le chiffre d\'affaires de {company} était de {amount} en {year}.',
     },
+    functions: {
+      title: 'Direction',
+      since: 'depuis le',
+      director: 'Administrateur',
+      manager: 'Gérant',
+      ceo: 'Administrateur délégué',
+      president: 'Président',
+      secretary: 'Secrétaire',
+      other: 'Fonction',
+    },
   },
   nl: {
     header: {
@@ -140,6 +150,16 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       turnoverQuestion: 'Wat is de omzet van {company}?',
       turnoverAnswer: 'De omzet van {company} bedroeg {amount} in {year}.',
     },
+    functions: {
+      title: 'Bestuur',
+      since: 'sinds',
+      director: 'Bestuurder',
+      manager: 'Zaakvoerder',
+      ceo: 'Gedelegeerd bestuurder',
+      president: 'Voorzitter',
+      secretary: 'Secretaris',
+      other: 'Functie',
+    },
   },
   en: {
     header: {
@@ -207,6 +227,16 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       employeesAnswer: 'According to the latest available data, {company} employs {count} people.',
       turnoverQuestion: 'What is the turnover of {company}?',
       turnoverAnswer: 'The turnover of {company} was {amount} in {year}.',
+    },
+    functions: {
+      title: 'Management',
+      since: 'since',
+      director: 'Director',
+      manager: 'Manager',
+      ceo: 'CEO',
+      president: 'President',
+      secretary: 'Secretary',
+      other: 'Function',
     },
   },
 };
