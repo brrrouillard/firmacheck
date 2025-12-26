@@ -9,7 +9,9 @@ export const GET: APIRoute = async ({ locals }) => {
     hasRuntimeEnv: !!runtimeEnv,
     hasUrl: !!runtimeEnv?.SUPABASE_URL,
     hasKey: !!runtimeEnv?.SUPABASE_ANON_KEY,
-    keyPrefix: runtimeEnv?.SUPABASE_ANON_KEY?.substring(0, 10) || 'missing',
+    keyLength: runtimeEnv?.SUPABASE_ANON_KEY?.length || 0,
+    keyPrefix: runtimeEnv?.SUPABASE_ANON_KEY?.substring(0, 20) || 'missing',
+    keySuffix: runtimeEnv?.SUPABASE_ANON_KEY?.slice(-10) || 'missing',
     urlPrefix: runtimeEnv?.SUPABASE_URL?.substring(0, 30) || 'missing',
   }, null, 2), {
     status: 200,
