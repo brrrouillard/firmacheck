@@ -1,0 +1,71 @@
+{
+  "usableSessionsCount": 2,
+  "retiredSessionsCount": 0,
+  "sessions": [
+    {
+      "id": "session_O0W7Q1toz0",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.0",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2025-12-25T18:44:58.669Z",
+      "createdAt": "2025-12-25T17:54:58.669Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_HukRIlolm6",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.0",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "ASLBSA",
+            "value": "00035e0590eeae688980183c5f382108885de38c4913ac0bdc2bd9bc1b3fd89b512b",
+            "expires": "2025-12-25T18:45:03.391Z",
+            "domain": "consult.cbso.nbb.be",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": true,
+            "creation": "2025-12-25T17:55:03.391Z",
+            "lastAccessed": "2025-12-25T17:55:03.391Z"
+          },
+          {
+            "key": "ASLBSACORS",
+            "value": "00035e0590eeae688980183c5f382108885de38c4913ac0bdc2bd9bc1b3fd89b512b",
+            "expires": "2025-12-25T18:45:03.391Z",
+            "domain": "consult.cbso.nbb.be",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": true,
+            "creation": "2025-12-25T17:55:03.391Z",
+            "lastAccessed": "2025-12-25T17:55:03.391Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2025-12-25T18:44:58.671Z",
+      "createdAt": "2025-12-25T17:54:58.671Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    }
+  ]
+}

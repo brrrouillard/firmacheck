@@ -1,0 +1,91 @@
+---
+// SSR route - do not prerender
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import '@/styles/global.css';
+import CompanyPage from '@/components/company-page.astro';
+import { getSupabase, normalizeVat, formatVat, slugifyCompanyName } from '@/lib';
+
+// Supported languages
+const SUPPORTED_LANGS = ['fr', 'nl', 'en'] as const;
+type Lang = (typeof SUPPORTED_LANGS)[number];
+
+// Parse the path: /[lang]/[vat]/[slug]
+const path = Astro.params.path || '';
+const segments = path.split('/').filter(Boolean);
+
+// Validate we have exactly 3 segments
+if (segments.length !== 3) {
+  return new Response('Not Found', { status: 404 });
+}
+
+const [lang, vat, slug] = segments;
+
+// Validate language
+if (!SUPPORTED_LANGS.includes(lang as Lang)) {
+  return Astro.redirect('/fr', 302);
+}
+
+// Normalize VAT number
+const normalizedVat = normalizeVat(vat);
+if (!normalizedVat) {
+  return new Response('Invalid VAT number', { status: 400 });
+}
+
+// Fetch company from database
+const supabase = getSupabase();
+const { data: company, error } = await supabase
+  .from('companies')
+  .select('*')
+  .eq('vat_number', normalizedVat)
+  .single();
+
+// Handle not found
+if (error || !company) {
+  return new Response('Company not found', { status: 404 });
+}
+
+// Generate canonical slug from current company name
+const canonicalSlug = slugifyCompanyName(company.name);
+
+// SEO Guardrail: 301 redirect if slug doesn't match
+if (slug !== canonicalSlug) {
+  return Astro.redirect(`/${lang}/${normalizedVat}/${canonicalSlug}`, 301);
+}
+
+// Prepare company data for the component
+const companyData = {
+  name: company.name,
+  vat_number: company.vat_number,
+  formatted_vat: formatVat(company.vat_number),
+  slug: company.slug,
+  legal_form: company.legal_form,
+  status: company.status as 'active' | 'stopped',
+  address: company.address as {
+    street?: string;
+    number?: string;
+    box?: string;
+    postal_code?: string;
+    city?: string;
+    country?: string;
+  } | null,
+  email: (company as any).email || null,
+  nace_codes: company.nace_codes,
+  nace_labels: (company as any).nace_labels || null,
+  financial_summary: company.financial_summary as {
+    year?: number;
+    turnover?: number;
+    profit_loss?: number;
+    equity?: number;
+    employees?: number;
+    gross_margin?: number;
+    net_margin?: number;
+  } | null,
+  updated_at: company.updated_at,
+};
+---
+
+<Layout title={`${company.name} | FirmaCheck`}>
+  <CompanyPage company={companyData} lang={lang} />
+</Layout>

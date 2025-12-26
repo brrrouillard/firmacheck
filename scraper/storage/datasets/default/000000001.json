@@ -1,0 +1,13 @@
+{
+	"vatNumber": "0439819279",
+	"status": "success",
+	"data": {
+		"vatNumber": "0439819279",
+		"year": 2024,
+		"turnover": 99377231.58,
+		"profitLoss": 9285.24,
+		"equity": 1317286.16,
+		"employees": 569
+	},
+	"scrapedAt": "2025-12-25T17:55:06.262Z"
+}

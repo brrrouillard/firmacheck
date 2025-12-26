@@ -1,0 +1,328 @@
+---
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { CopyButton } from '@/components/copy-button';
+import {
+  Building2,
+  MapPin,
+  Briefcase,
+  TrendingUp,
+  Users,
+  Calendar,
+  ExternalLink,
+  Mail,
+  Hash,
+  FileText,
+  CircleCheck,
+  CircleX,
+  Megaphone,
+  Coins,
+} from 'lucide-react';
+
+interface CompanyAddress {
+  street?: string;
+  number?: string;
+  box?: string;
+  postal_code?: string;
+  city?: string;
+  country?: string;
+}
+
+interface FinancialSummary {
+  year?: number;
+  turnover?: number;
+  profit_loss?: number;
+  equity?: number;
+  employees?: number;
+  gross_margin?: number;
+  net_margin?: number;
+}
+
+interface Props {
+  company: {
+    name: string;
+    vat_number: string;
+    formatted_vat: string | null;
+    slug: string;
+    legal_form: string | null;
+    status: 'active' | 'stopped';
+    address: CompanyAddress | null;
+    email: string | null;
+    nace_codes: string[] | null;
+    nace_labels: string[] | null;
+    financial_summary: FinancialSummary | null;
+    updated_at: string;
+  };
+  lang: string;
+}
+
+const { company, lang } = Astro.props;
+const address = company.address;
+const financials = company.financial_summary;
+
+const formatEnterpriseNumber = (vat: string) => {
+  const digits = vat.replace(/\D/g, '');
+  if (digits.length !== 10) return digits;
+  return `${digits.slice(0, 4)}.${digits.slice(4, 7)}.${digits.slice(7, 10)}`;
+};
+
+const formatCurrency = (value?: number) => {
+  if (value === undefined || value === null) return '—';
+  return new Intl.NumberFormat('fr-BE', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const enterpriseNumber = formatEnterpriseNumber(company.vat_number);
+const fullAddress = address
+  ? `${address.street} ${address.number}${address.box ? `, ${address.box}` : ''}, ${address.postal_code} ${address.city}`
+  : null;
+---
+
+<main class="min-h-screen bg-background">
+  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <!-- Header Card -->
+    <Card className="mb-6">
+      <CardHeader className="pb-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
+              <Building2 className="h-7 w-7 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">{company.name}</CardTitle>
+              <div class="mt-1 flex items-center gap-1">
+                {company.status === 'active' ? (
+                  <CircleCheck className="h-4 w-4 text-green-600" />
+                ) : (
+                  <CircleX className="h-4 w-4 text-destructive" />
+                )}
+                <span class={`text-sm font-medium ${company.status === 'active' ? 'text-green-600' : 'text-destructive'}`}>
+                  {company.status === 'active' ? 'Active' : 'Stopped'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <!-- Identifiers Row -->
+        <div class="grid gap-4 sm:grid-cols-2">
+          <!-- VAT Number -->
+          <div class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+              <Hash className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-muted-foreground">VAT Number</p>
+              <div class="flex items-center gap-1">
+                <span class="font-mono text-sm">{company.formatted_vat}</span>
+                <CopyButton value={company.formatted_vat || company.vat_number} label="VAT number" client:load />
+              </div>
+            </div>
+          </div>
+
+          <!-- Enterprise Number -->
+          <div class="flex items-center gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-muted-foreground">Enterprise Number</p>
+              <div class="flex items-center gap-1">
+                <span class="font-mono text-sm">{enterpriseNumber}</span>
+                <CopyButton value={enterpriseNumber} label="enterprise number" client:load />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        <!-- Details Row -->
+        <div class="grid gap-4 sm:grid-cols-2">
+          <!-- Legal Form -->
+          {company.legal_form && (
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-muted-foreground">Legal Form</p>
+                <p class="text-sm truncate" title={company.legal_form}>{company.legal_form}</p>
+              </div>
+            </div>
+          )}
+
+          <!-- Email -->
+          {company.email && (
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-muted-foreground">Contact Email</p>
+                <a href={`mailto:${company.email}`} class="text-sm text-primary hover:underline truncate block">
+                  {company.email}
+                </a>
+              </div>
+            </div>
+          )}
+
+          <!-- Address -->
+          {address && (
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-muted-foreground">Address</p>
+                <p class="text-sm truncate" title={fullAddress}>
+                  {fullAddress}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <!-- Activities -->
+          {company.nace_labels && company.nace_labels.length > 0 && (
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                <Megaphone className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs text-muted-foreground">Activities</p>
+                <p class="text-sm truncate" title={company.nace_labels.join(', ')}>
+                  {company.nace_labels[0]}
+                  {company.nace_labels.length > 1 && ` +${company.nace_labels.length - 1} more`}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      <!-- Données financières Card -->
+      {financials && (financials.gross_margin !== undefined || financials.net_margin !== undefined) && (
+        <Card>
+          <CardHeader>
+            <div class="flex items-center gap-2">
+              <Coins className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>
+                Données financières
+                {financials.year && (
+                  <Badge variant="secondary" className="ml-2">
+                    {financials.year}
+                  </Badge>
+                )}
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div class="grid gap-6 grid-cols-2">
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground">Marge brute</p>
+                <p class={`text-2xl font-semibold ${
+                  financials.gross_margin && financials.gross_margin >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatCurrency(financials.gross_margin)}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground">Marge nette</p>
+                <p class={`text-2xl font-semibold ${
+                  financials.net_margin && financials.net_margin >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatCurrency(financials.net_margin)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <!-- Financials Card -->
+      {financials && (
+        <Card>
+          <CardHeader>
+            <div class="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>
+                Financial Summary
+                {financials.year && (
+                  <Badge variant="secondary" className="ml-2">
+                    {financials.year}
+                  </Badge>
+                )}
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div class="grid gap-6 grid-cols-2">
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground">Turnover</p>
+                <p class="text-2xl font-semibold">
+                  {formatCurrency(financials.turnover)}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground">Profit/Loss</p>
+                <p class={`text-2xl font-semibold ${
+                  financials.profit_loss && financials.profit_loss >= 0
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {formatCurrency(financials.profit_loss)}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground">Equity</p>
+                <p class="text-2xl font-semibold">
+                  {formatCurrency(financials.equity)}
+                </p>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm text-muted-foreground flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  Employees
+                </p>
+                <p class="text-2xl font-semibold">
+                  {financials.employees ?? '—'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+
+    <!-- Footer -->
+    <Separator className="my-6" />
+    <footer class="flex items-center justify-between text-sm text-muted-foreground">
+      <div class="flex items-center gap-2">
+        <Calendar className="h-4 w-4" />
+        <span>
+          Last updated: {new Date(company.updated_at).toLocaleDateString('fr-BE')}
+        </span>
+      </div>
+      <a
+        href={`https://kbo-bce.be/en/search?q=${company.vat_number}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center gap-1 hover:text-foreground transition-colors"
+      >
+        <span>View on KBO</span>
+        <ExternalLink className="h-3 w-3" />
+      </a>
+    </footer>
+  </div>
+</main>

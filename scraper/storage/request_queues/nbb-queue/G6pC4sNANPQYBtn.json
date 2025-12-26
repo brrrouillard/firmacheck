@@ -1,0 +1,9 @@
+{
+	"id": "G6pC4sNANPQYBtn",
+	"json": "{\"id\":\"G6pC4sNANPQYBtn\",\"url\":\"https://consult.cbso.nbb.be/consult-enterprise/0439819279\",\"loadedUrl\":\"https://consult.cbso.nbb.be/consult-enterprise/0439819279\",\"uniqueKey\":\"nbb-0439819279\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"vatNumber\":\"0439819279\"},\"handledAt\":\"2025-12-25T17:55:06.540Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "nbb-0439819279",
+	"url": "https://consult.cbso.nbb.be/consult-enterprise/0439819279"
+}

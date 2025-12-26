@@ -1,0 +1,26 @@
+{
+  "name": "@firmacheck/scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "dev": "bun --watch src/main.ts",
+    "import-kbo": "bun run src/main.ts import-kbo",
+    "enrich-nbb": "bun run src/main.ts enrich-nbb"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "@types/xml2js": "^0.4.14",
+    "cheerio": "^1.0.0",
+    "crawlee": "^3.12.2",
+    "csv-parse": "^5.6.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "playwright": "^1.57.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
