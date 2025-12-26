@@ -33,7 +33,18 @@ const calculateAge = (dateStr: string | null) => {
 };
 
 const age = calculateAge(startDate);
-const foundedYear = startDate ? new Date(startDate).getFullYear() : null;
+
+// Format date as DD/MM/YYYY
+const formatDate = (dateStr: string | null) => {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+const foundedDate = formatDate(startDate);
 
 // Format address
 const boxLabel = t(typedLang, 'identity', 'box');
@@ -90,11 +101,11 @@ const formatWebsite = (url?: string) => {
     )}
 
     {/* Founded / Age */}
-    {foundedYear && age !== null && (
+    {foundedDate && age !== null && (
       <div class="flex items-center gap-3">
         <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
         <span class="text-sm">
-          {t(typedLang, 'identity', 'foundedIn')} {foundedYear} ({age} {t(typedLang, 'identity', 'yearsOld')})
+          {t(typedLang, 'identity', 'foundedIn')} {foundedDate} ({age} {t(typedLang, 'identity', 'yearsOld')})
         </span>
       </div>
     )}
