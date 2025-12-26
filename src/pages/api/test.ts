@@ -19,6 +19,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       hasUrl: !!runtimeEnv?.SUPABASE_URL,
       hasKey: !!runtimeEnv?.SUPABASE_ANON_KEY,
       urlPrefix: runtimeEnv?.SUPABASE_URL?.substring(0, 30) || 'missing',
+      keyPrefix: runtimeEnv?.SUPABASE_ANON_KEY?.substring(0, 20) || 'missing',
     },
     query: url.searchParams.get('q') || 'none',
     timestamp: new Date().toISOString(),
