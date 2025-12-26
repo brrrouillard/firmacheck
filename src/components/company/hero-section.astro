@@ -19,13 +19,14 @@ interface Props {
   name: string;
   formattedVat: string;
   vatNumber: string;
+  legalForm: string | null;
   juridicalSituation: JuridicalSituation;
   status: 'active' | 'stopped';
   updatedAt: string;
   lang: string;
 }
 
-const { name, formattedVat, vatNumber, juridicalSituation, status, updatedAt, lang } = Astro.props;
+const { name, formattedVat, vatNumber, legalForm, juridicalSituation, status, updatedAt, lang } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const situationLabel = getJuridicalSituationLabel(juridicalSituation, typedLang);
 const situationColorClass = getJuridicalSituationColor(juridicalSituation);
@@ -42,7 +43,10 @@ const freshnessLabel = formatDaysAgo(daysAgo, typedLang);
           <Building2 className="h-7 w-7 text-primary" />
         </div>
         <div class="min-w-0">
-          <h1 class="text-2xl font-bold tracking-tight sm:text-3xl truncate">{name}</h1>
+          <h1 class="text-2xl font-bold tracking-tight sm:text-3xl truncate">
+            {name}
+            {legalForm && <span class="text-lg font-normal text-muted-foreground ml-2">({legalForm})</span>}
+          </h1>
           <div class="mt-2 flex flex-wrap items-center gap-3">
             <div class="flex items-center gap-1">
               <span class="font-mono text-sm text-muted-foreground">{formattedVat}</span>
