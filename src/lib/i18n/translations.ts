@@ -6,6 +6,9 @@ export type SupportedLang = 'fr' | 'nl' | 'en';
 
 const translations: Record<SupportedLang, Record<string, Record<string, string>>> = {
   fr: {
+    header: {
+      searchPlaceholder: 'Rechercher une entreprise...',
+    },
     hero: {
       trackCompany: 'Suivre',
       downloadReport: 'Rapport PDF',
@@ -23,6 +26,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       yearsOld: 'ans',
       contact: 'Contact',
       noAddress: 'Adresse non disponible',
+      box: 'bte',
     },
     activity: {
       mainActivity: 'Activité principale',
@@ -39,6 +43,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       grossMargin: 'Marge brute',
       netMargin: 'Marge nette',
       equity: 'Fonds propres',
+      detailedFinancials: 'Données financières détaillées',
     },
     footer: {
       dataLabel: 'Données :',
@@ -51,6 +56,9 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     },
   },
   nl: {
+    header: {
+      searchPlaceholder: 'Zoek een bedrijf...',
+    },
     hero: {
       trackCompany: 'Volgen',
       downloadReport: 'PDF Rapport',
@@ -59,7 +67,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     snapshot: {
       identity: 'Identiteit',
       activity: 'Activiteit',
-      financialPulse: 'Financiele gezondheid',
+      financialPulse: 'Financiële gezondheid',
     },
     identity: {
       address: 'Adres',
@@ -68,6 +76,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       yearsOld: 'jaar',
       contact: 'Contact',
       noAddress: 'Adres niet beschikbaar',
+      box: 'bus',
     },
     activity: {
       mainActivity: 'Hoofdactiviteit',
@@ -84,6 +93,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       grossMargin: 'Bruto marge',
       netMargin: 'Netto marge',
       equity: 'Eigen vermogen',
+      detailedFinancials: 'Gedetailleerde financiële gegevens',
     },
     footer: {
       dataLabel: 'Gegevens:',
@@ -96,6 +106,9 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
     },
   },
   en: {
+    header: {
+      searchPlaceholder: 'Search companies...',
+    },
     hero: {
       trackCompany: 'Track',
       downloadReport: 'PDF Report',
@@ -113,6 +126,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       yearsOld: 'years',
       contact: 'Contact',
       noAddress: 'Address not available',
+      box: 'box',
     },
     activity: {
       mainActivity: 'Main Activity',
@@ -129,6 +143,7 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       grossMargin: 'Gross Margin',
       netMargin: 'Net Margin',
       equity: 'Equity',
+      detailedFinancials: 'Detailed Financial Data',
     },
     footer: {
       dataLabel: 'Data:',

@@ -113,7 +113,7 @@ const formatCurrency = (value?: number) => {
               <div class="flex items-center gap-2">
                 <Coins className="h-5 w-5 text-muted-foreground" />
                 <CardTitle className="text-base font-medium">
-                  {typedLang === 'nl' ? 'Gedetailleerde financiele gegevens' : 'Donnees financieres detaillees'}
+                  {t(typedLang, 'financials', 'detailedFinancials')}
                 </CardTitle>
               </div>
               {financials?.year && (

@@ -1,15 +1,20 @@
 ---
 import { Header } from "@/components/header";
+import { t } from "@/lib/i18n/translations";
+import type { SupportedLang } from "@/lib/i18n/translations";
 
 interface Props {
   title: string;
+  lang?: string;
 }
 
-const { title } = Astro.props;
+const { title, lang = 'fr' } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+const searchPlaceholder = t(typedLang, 'header', 'searchPlaceholder');
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={typedLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,7 +22,7 @@ const { title } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
-    <Header />
+    <Header searchPlaceholder={searchPlaceholder} />
     <slot />
   </body>
 </html>

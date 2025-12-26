@@ -36,11 +36,12 @@ const age = calculateAge(startDate);
 const foundedYear = startDate ? new Date(startDate).getFullYear() : null;
 
 // Format address
+const boxLabel = t(typedLang, 'identity', 'box');
 const addressParts = [];
 if (address?.street) {
   let street = address.street;
   if (address.number) street += ` ${address.number}`;
-  if (address.box) street += ` bte ${address.box}`;
+  if (address.box) street += ` ${boxLabel} ${address.box}`;
   addressParts.push(street);
 }
 if (address?.postal_code || address?.city) {
