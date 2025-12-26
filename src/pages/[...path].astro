@@ -47,8 +47,11 @@ const { data: result, error } = await supabase.rpc('get_company_with_related', {
   p_limit: 3,
 });
 
-// Handle not found
-if (error || !result?.company) {
+// Handle not found or error
+if (error) {
+  return new Response(`Database error: ${error.message}`, { status: 500 });
+}
+if (!result?.company) {
   return new Response('Company not found', { status: 404 });
 }
 
