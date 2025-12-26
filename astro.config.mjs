@@ -13,13 +13,10 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
-    ssr: {
-      resolve: {
-        conditions: ['workerd', 'worker', 'browser'],
-      },
-    },
     resolve: {
-      conditions: ['workerd', 'worker', 'browser'],
+      alias: import.meta.env.PROD && {
+        'react-dom/server': 'react-dom/server.edge',
+      },
     },
   },
   i18n: {
