@@ -5,13 +5,7 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({
-    routes: {
-      extend: {
-        include: [{ pattern: '/api/*' }],
-      },
-    },
-  }),
+  adapter: cloudflare(),
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
