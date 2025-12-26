@@ -146,7 +146,7 @@ export function SearchInput({ placeholder, lang, className, autoFocus }: SearchI
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto text-left">
           {results.length === 0 && query.length >= 3 && !isLoading ? (
             <div className="px-4 py-3 text-sm text-muted-foreground text-center">
               {translations[lang].noResults}
