@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
 import { getSupabase } from '@/lib/db/client';
 
+// SSR route - do not prerender
+export const prerender = false;
+
 export interface SearchResult {
   vat_number: string;
   name: string;
