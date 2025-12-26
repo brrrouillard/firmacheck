@@ -13,6 +13,14 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      resolve: {
+        conditions: ['workerd', 'worker', 'browser'],
+      },
+    },
+    resolve: {
+      conditions: ['workerd', 'worker', 'browser'],
+    },
   },
   i18n: {
     locales: ['fr', 'nl', 'en'],
