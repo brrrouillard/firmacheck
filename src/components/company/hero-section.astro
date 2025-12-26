@@ -2,11 +2,18 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/copy-button';
-import { Building2, Bell, FileDown } from 'lucide-react';
+import { Building2, Bell, FileDown, Clock } from 'lucide-react';
 import { getJuridicalSituationLabel, getJuridicalSituationColor } from '@/lib/data/juridical-situations';
-import { t } from '@/lib/i18n/translations';
+import { t, formatDaysAgo } from '@/lib/i18n/translations';
 import type { JuridicalSituation } from '@/lib/db/types';
 import type { SupportedLang } from '@/lib/i18n/translations';
+
+const calculateDaysAgo = (dateStr: string) => {
+  const updated = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - updated.getTime();
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+};
 
 interface Props {
   name: string;
@@ -14,13 +21,16 @@ interface Props {
   vatNumber: string;
   juridicalSituation: JuridicalSituation;
   status: 'active' | 'stopped';
+  updatedAt: string;
   lang: string;
 }
 
-const { name, formattedVat, vatNumber, juridicalSituation, status, lang } = Astro.props;
+const { name, formattedVat, vatNumber, juridicalSituation, status, updatedAt, lang } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const situationLabel = getJuridicalSituationLabel(juridicalSituation, typedLang);
 const situationColorClass = getJuridicalSituationColor(juridicalSituation);
+const daysAgo = calculateDaysAgo(updatedAt);
+const freshnessLabel = formatDaysAgo(daysAgo, typedLang);
 ---
 
 <section class="border-b border-border bg-card">
@@ -45,16 +55,25 @@ const situationColorClass = getJuridicalSituationColor(juridicalSituation);
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex gap-2 shrink-0">
-        <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
-          <Bell className="mr-1.5 h-4 w-4" />
-          <span class="hidden sm:inline">{t(typedLang, 'hero', 'trackCompany')}</span>
-        </Button>
-        <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
-          <FileDown className="mr-1.5 h-4 w-4" />
-          <span class="hidden sm:inline">{t(typedLang, 'hero', 'downloadReport')}</span>
-        </Button>
+      <!-- Right Side: Freshness + Actions -->
+      <div class="flex flex-col items-end gap-3 shrink-0">
+        <!-- Data Freshness Badge -->
+        <Badge variant="outline" className="gap-1.5 font-normal text-muted-foreground">
+          <Clock className="h-3 w-3" />
+          {freshnessLabel}
+        </Badge>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2">
+          <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
+            <Bell className="mr-1.5 h-4 w-4" />
+            <span class="hidden sm:inline">{t(typedLang, 'hero', 'trackCompany')}</span>
+          </Button>
+          <Button variant="outline" size="sm" disabled title={t(typedLang, 'hero', 'comingSoon')}>
+            <FileDown className="mr-1.5 h-4 w-4" />
+            <span class="hidden sm:inline">{t(typedLang, 'hero', 'downloadReport')}</span>
+          </Button>
+        </div>
       </div>
     </div>
   </div>

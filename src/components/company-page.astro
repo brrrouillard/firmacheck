@@ -14,7 +14,6 @@ import SnapshotGrid from './company/snapshot-grid.astro';
 import IdentityCard from './company/identity-card.astro';
 import ActivityCard from './company/activity-card.astro';
 import FinancialPulseCard from './company/financial-pulse-card.astro';
-import DataFreshnessBadge from './company/data-freshness-badge.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -80,6 +79,7 @@ const formatCurrency = (value?: number) => {
     vatNumber={company.vat_number}
     juridicalSituation={company.juridical_situation}
     status={company.status}
+    updatedAt={company.updated_at}
     lang={lang}
   />
 
@@ -187,28 +187,25 @@ const formatCurrency = (value?: number) => {
   <Separator />
   <footer class="py-4">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <DataFreshnessBadge updatedAt={company.updated_at} lang={lang} />
-        <div class="flex gap-4">
-          <a
-            href={`https://kbo-bce.be/${typedLang === 'nl' ? 'nl' : 'fr'}/zoeken?q=${company.vat_number}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span>{t(typedLang, 'footer', 'viewOnKbo')}</span>
-            <ExternalLink className="h-3 w-3" />
-          </a>
-          <a
-            href={`https://cri.nbb.be/bc9/web/catalog?lang=${typedLang === 'nl' ? 'N' : 'F'}&companyNr=${company.vat_number}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span>{t(typedLang, 'footer', 'viewOnNbb')}</span>
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </div>
+      <div class="flex justify-end gap-4">
+        <a
+          href={`https://kbo-bce.be/${typedLang === 'nl' ? 'nl' : 'fr'}/zoeken?q=${company.vat_number}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span>{t(typedLang, 'footer', 'viewOnKbo')}</span>
+          <ExternalLink className="h-3 w-3" />
+        </a>
+        <a
+          href={`https://cri.nbb.be/bc9/web/catalog?lang=${typedLang === 'nl' ? 'N' : 'F'}&companyNr=${company.vat_number}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span>{t(typedLang, 'footer', 'viewOnNbb')}</span>
+          <ExternalLink className="h-3 w-3" />
+        </a>
       </div>
     </div>
   </footer>

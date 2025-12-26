@@ -41,7 +41,8 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       equity: 'Fonds propres',
     },
     footer: {
-      updatedDaysAgo: 'Mis à jour il y a',
+      dataLabel: 'Données :',
+      updatedDaysAgo: 'il y a',
       days: 'jours',
       today: 'aujourd\'hui',
       yesterday: 'hier',
@@ -85,7 +86,8 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       equity: 'Eigen vermogen',
     },
     footer: {
-      updatedDaysAgo: 'Bijgewerkt',
+      dataLabel: 'Gegevens:',
+      updatedDaysAgo: '',
       days: 'dagen geleden',
       today: 'vandaag',
       yesterday: 'gisteren',
@@ -129,7 +131,8 @@ const translations: Record<SupportedLang, Record<string, Record<string, string>>
       equity: 'Equity',
     },
     footer: {
-      updatedDaysAgo: 'Updated',
+      dataLabel: 'Data:',
+      updatedDaysAgo: '',
       days: 'days ago',
       today: 'today',
       yesterday: 'yesterday',
@@ -150,18 +153,20 @@ export function t(lang: SupportedLang, section: string, key: string): string {
 }
 
 /**
- * Format days ago with appropriate text
+ * Format days ago with appropriate text (includes "Data:" label)
  */
 export function formatDaysAgo(days: number, lang: SupportedLang): string {
-  if (days === 0) return t(lang, 'footer', 'today');
-  if (days === 1) return t(lang, 'footer', 'yesterday');
+  const label = t(lang, 'footer', 'dataLabel');
+
+  if (days === 0) return `${label} ${t(lang, 'footer', 'today')}`;
+  if (days === 1) return `${label} ${t(lang, 'footer', 'yesterday')}`;
 
   const prefix = t(lang, 'footer', 'updatedDaysAgo');
   const suffix = t(lang, 'footer', 'days');
 
   // Different word order for different languages
-  if (lang === 'nl') {
-    return `${prefix} ${days} ${suffix}`;
+  if (lang === 'fr') {
+    return `${label} ${prefix} ${days} ${suffix}`;
   }
-  return `${prefix} ${days} ${suffix}`;
+  return `${label} ${days} ${suffix}`;
 }

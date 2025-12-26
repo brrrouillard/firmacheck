@@ -1,16 +1,6 @@
 import { getSupabase } from './client.js';
-import type { CompanyInsert, CompanyUpdate, FinancialSummary, CompanyAddress, CompanyStatus } from './types.js';
+import type { CompanyInsert, CompanyUpdate, FinancialSummary } from './types.js';
 import { logger } from '../utils/logger.js';
-
-export interface KboCompanyData {
-  vatNumber: string;
-  name: string;
-  slug: string;
-  legalForm: string | null;
-  status: CompanyStatus;
-  address: CompanyAddress | null;
-  naceCodes: string[];
-}
 
 export interface NbbFinancialData {
   vatNumber: string;
@@ -22,55 +12,14 @@ export interface NbbFinancialData {
 }
 
 /**
- * Upsert company from KBO data
- */
-export async function upsertFromKbo(kboData: KboCompanyData): Promise<void> {
-  const supabase = getSupabase();
-
-  const companyInsert: CompanyInsert = {
-    vat_number: kboData.vatNumber,
-    name: kboData.name,
-    slug: kboData.slug,
-    legal_form: kboData.legalForm ?? undefined,
-    status: kboData.status,
-    address: kboData.address ?? undefined,
-    nace_codes: kboData.naceCodes.length > 0 ? kboData.naceCodes : undefined,
-  };
-
-  const { error } = await supabase
-    .from('companies')
-    .upsert(companyInsert as any, {
-      onConflict: 'vat_number',
-      ignoreDuplicates: false,
-    });
-
-  if (error) {
-    logger.error({ vatNumber: kboData.vatNumber, error: error.message }, 'Failed to upsert KBO data');
-    throw error;
-  }
-
-  logger.debug({ vatNumber: kboData.vatNumber }, 'Upserted KBO company data');
-}
-
-/**
  * Batch upsert companies from KBO data
  */
-export async function batchUpsertFromKbo(companies: KboCompanyData[]): Promise<{ success: number; failed: number }> {
+export async function batchUpsertFromKbo(companies: CompanyInsert[]): Promise<{ success: number; failed: number }> {
   const supabase = getSupabase();
-
-  const inserts: CompanyInsert[] = companies.map((kboData) => ({
-    vat_number: kboData.vatNumber,
-    name: kboData.name,
-    slug: kboData.slug,
-    legal_form: kboData.legalForm ?? undefined,
-    status: kboData.status,
-    address: kboData.address ?? undefined,
-    nace_codes: kboData.naceCodes.length > 0 ? kboData.naceCodes : undefined,
-  }));
 
   const { error, count } = await supabase
     .from('companies')
-    .upsert(inserts as any, {
+    .upsert(companies as any, {
       onConflict: 'vat_number',
       ignoreDuplicates: false,
       count: 'exact',
@@ -119,6 +68,114 @@ export async function enrichWithNbb(nbbData: NbbFinancialData): Promise<void> {
   }
 
   logger.debug({ vatNumber: nbbData.vatNumber, year: nbbData.year }, 'Enriched company with NBB financial data');
+}
+
+/**
+ * Batch update NACE codes for multiple companies
+ * Used for efficient streaming of large activity.csv files
+ */
+export async function batchUpdateNaceCodes(
+  naceCodeMap: Map<string, { codes: string[]; main?: string }>
+): Promise<{ updated: number; mainCodes: number }> {
+  const supabase = getSupabase();
+  let updated = 0;
+  let mainCodes = 0;
+
+  const entries = Array.from(naceCodeMap.entries());
+
+  // Batch the updates to avoid too many concurrent requests
+  const batchSize = 100;
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    const promises = batch.map(async ([vatNumber, data]) => {
+      const updateData: { nace_codes: string[]; nace_main?: string } = {
+        nace_codes: data.codes,
+      };
+
+      if (data.main) {
+        updateData.nace_main = data.main;
+      }
+
+      const { error } = await (supabase
+        .from('companies') as any)
+        .update(updateData)
+        .eq('vat_number', vatNumber);
+
+      if (!error) {
+        return { updated: 1, main: data.main ? 1 : 0 };
+      }
+      return { updated: 0, main: 0 };
+    });
+
+    const results = await Promise.all(promises);
+    updated += results.reduce((a, b) => a + b.updated, 0);
+    mainCodes += results.reduce((a, b) => a + b.main, 0);
+  }
+
+  return { updated, mainCodes };
+}
+
+/**
+ * Batch update contacts for multiple companies
+ */
+export async function batchUpdateContacts(
+  contactMap: Map<string, { phone?: string; email?: string; website?: string; fax?: string }>
+): Promise<number> {
+  const supabase = getSupabase();
+  let updated = 0;
+
+  const entries = Array.from(contactMap.entries());
+  const batchSize = 100;
+
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    const promises = batch.map(async ([vatNumber, contact]) => {
+      const { error } = await (supabase
+        .from('companies') as any)
+        .update({ contact })
+        .eq('vat_number', vatNumber);
+
+      return error ? 0 : 1;
+    });
+
+    const results = await Promise.all(promises);
+    updated += results.reduce((a, b) => a + b, 0);
+  }
+
+  return updated;
+}
+
+/**
+ * Batch update establishment counts for multiple companies
+ */
+export async function batchUpdateEstablishmentCounts(
+  countMap: Map<string, number>
+): Promise<number> {
+  const supabase = getSupabase();
+  let updated = 0;
+
+  const entries = Array.from(countMap.entries());
+  const batchSize = 100;
+
+  for (let i = 0; i < entries.length; i += batchSize) {
+    const batch = entries.slice(i, i + batchSize);
+
+    const promises = batch.map(async ([vatNumber, count]) => {
+      const { error } = await (supabase
+        .from('companies') as any)
+        .update({ establishment_count: count })
+        .eq('vat_number', vatNumber);
+
+      return error ? 0 : 1;
+    });
+
+    const results = await Promise.all(promises);
+    updated += results.reduce((a, b) => a + b, 0);
+  }
+
+  return updated;
 }
 
 /**

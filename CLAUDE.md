@@ -87,6 +87,116 @@ Separate Bun project for data import and enrichment. Uses Crawlee + Playwright f
 - `import-kbo` - Imports company data from KBO Open Data CSV files
 - `enrich-nbb` - Enriches companies with financial data from NBB (National Bank of Belgium)
 
+## KBO Data Import
+
+### Data Source
+
+Belgian company data comes from the **KBO Open Data** (Kruispuntbank van Ondernemingen / Banque-Carrefour des Entreprises):
+
+- **Download**: https://kbopub.economie.fgov.be/kbo-open-data/
+- **License**: Open Data (free for commercial use)
+- **Update frequency**: Monthly
+
+### Required CSV Files
+
+Download and extract the KBO Open Data ZIP. The import uses these files:
+
+| File | Size | Description |
+|------|------|-------------|
+| `enterprise.csv` | ~86MB | Core company data (VAT, status, legal form, start date) |
+| `denomination.csv` | ~147MB | Company names (multilingual: FR/NL/DE/EN) |
+| `address.csv` | ~288MB | Registered addresses (bilingual) |
+| `activity.csv` | ~1.5GB | NACE codes (industry classification) |
+| `contact.csv` | ~25MB | Phone, email, website, fax (optional) |
+| `establishment.csv` | ~60MB | Branch/establishment data (optional) |
+
+### Import Command
+
+```bash
+cd scraper
+
+# Full import with all data (recommended)
+bun run src/main.ts import-kbo \
+  --enterprise ../datasets/enterprise.csv \
+  --denomination ../datasets/denomination.csv \
+  --address ../datasets/address.csv \
+  --activity ../datasets/activity.csv \
+  --contact ../datasets/contact.csv \
+  --establishment ../datasets/establishment.csv
+
+# Minimal import (required files only)
+bun run src/main.ts import-kbo \
+  --enterprise ../datasets/enterprise.csv \
+  --denomination ../datasets/denomination.csv \
+  --address ../datasets/address.csv \
+  --activity ../datasets/activity.csv
+
+# Include stopped/inactive companies
+bun run src/main.ts import-kbo \
+  --enterprise ../datasets/enterprise.csv \
+  ... \
+  --all
+```
+
+### Import Process (7-Pass Stream Processing)
+
+The importer uses memory-efficient streaming to handle the 1.5GB activity.csv:
+
+1. **Pass 1**: Parse `enterprise.csv` → filter active legal entities, extract VAT/status/legal form/start date
+2. **Pass 2**: Parse `denomination.csv` → match names (FR/NL/DE/EN, abbreviations, commercial names)
+3. **Pass 3**: Parse `address.csv` → match addresses (bilingual street/city)
+4. **Pass 4**: Parse `contact.csv` → extract phone/email/website/fax
+5. **Pass 5**: Parse `establishment.csv` → count branches per enterprise
+6. **Pass 6**: Batch upsert companies to Supabase (1000/batch)
+7. **Pass 7**: Stream `activity.csv` → update NACE codes directly in DB
+
+### Database Schema
+
+Primary key is `vat_number` (10-digit Belgian enterprise number). Key fields:
+
+```sql
+vat_number VARCHAR(10) PRIMARY KEY,
+name TEXT NOT NULL,                    -- Primary display name
+slug VARCHAR(255) NOT NULL,            -- URL slug
+names JSONB,                           -- {fr, nl, de, en, abbreviation, commercial}
+legal_form VARCHAR(50),                -- e.g., "SRL", "SA", "SPRL"
+status company_status,                 -- 'active' | 'stopped'
+juridical_situation juridical_situation, -- 'normal', 'bankruptcy', 'liquidation', etc.
+start_date DATE,
+address JSONB,                         -- {street_fr, street_nl, city_fr, city_nl, postal_code, ...}
+contact JSONB,                         -- {phone, email, website, fax}
+nace_codes TEXT[],                     -- All NACE 2008 activity codes
+nace_main VARCHAR(10),                 -- Primary activity code
+establishment_count INT,               -- Number of branches
+financial_summary JSONB,               -- NBB enrichment data
+```
+
+### Import Statistics (December 2024)
+
+| Metric | Value |
+|--------|-------|
+| Total companies imported | 1,132,830 |
+| With NACE codes | 723,905 (63.9%) |
+| With contact info | 129,340 (11.4%) |
+| With establishments | 790,916 (69.8%) |
+| Import duration | ~75 minutes |
+| CSV rows processed | ~45M total |
+
+### Juridical Situation Codes
+
+The KBO uses numeric codes for juridical situations, mapped to our enum:
+
+| Code | Meaning |
+|------|---------|
+| 000 | Normal activity |
+| 012 | Opening of bankruptcy |
+| 050 | Bankruptcy |
+| 091 | Liquidation |
+| 041 | Merger/acquisition |
+| 020 | Voluntary dissolution |
+
+Full mapping in `scraper/src/db/types.ts`
+
 ## Path Aliases
 
 `@/*` maps to `./src/*` (configured in tsconfig.json)

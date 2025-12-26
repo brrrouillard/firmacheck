@@ -12,25 +12,43 @@ Commands:
   enrich-nbb    Enrich companies with financial data from NBB
 
 Examples:
-  # Import KBO data from CSV files
+  # Full import with all data (active companies only)
   bun run src/main.ts import-kbo \\
-    --enterprise ./data/enterprise.csv \\
-    --denomination ./data/denomination.csv \\
-    --address ./data/address.csv \\
-    --activity ./data/activity.csv
+    --enterprise ../datasets/enterprise.csv \\
+    --denomination ../datasets/denomination.csv \\
+    --address ../datasets/address.csv \\
+    --activity ../datasets/activity.csv \\
+    --contact ../datasets/contact.csv \\
+    --establishment ../datasets/establishment.csv
 
-  # Enrich all companies needing updates
-  bun run src/main.ts enrich-nbb
+  # Minimal import (required files only)
+  bun run src/main.ts import-kbo \\
+    --enterprise ../datasets/enterprise.csv \\
+    --denomination ../datasets/denomination.csv \\
+    --address ../datasets/address.csv \\
+    --activity ../datasets/activity.csv
 
-  # Enrich specific company
+  # Include stopped companies
+  bun run src/main.ts import-kbo \\
+    --enterprise ../datasets/enterprise.csv \\
+    --denomination ../datasets/denomination.csv \\
+    --address ../datasets/address.csv \\
+    --activity ../datasets/activity.csv \\
+    --all
+
+  # Enrich specific company with NBB financial data
   bun run src/main.ts enrich-nbb --vat 0417497106
 
   # Enrich companies not updated in 60 days (limit 500)
   bun run src/main.ts enrich-nbb --older-than 60 --limit 500
 
 Options:
-  --help        Show this help message
-  --dry-run     Parse files without writing to database (import-kbo only)
+  --help          Show this help message
+  --dry-run       Parse files without writing to database
+  --all           Import all companies, not just active ones
+  --batch-size    Number of records per batch (default: 1000)
+  --contact       Path to contact.csv (optional, adds phone/email/website)
+  --establishment Path to establishment.csv (optional, adds branch count)
 `;
 
 interface ImportKboArgs {
@@ -38,8 +56,11 @@ interface ImportKboArgs {
   denomination?: string;
   address?: string;
   activity?: string;
+  contact?: string;
+  establishment?: string;
   dryRun: boolean;
   batchSize: number;
+  activeOnly: boolean;
 }
 
 interface EnrichNbbArgs {
@@ -81,28 +102,44 @@ async function runImportKbo(options: Record<string, string | boolean>, logger: a
     denomination: options['denomination'] as string | undefined,
     address: options['address'] as string | undefined,
     activity: options['activity'] as string | undefined,
+    contact: options['contact'] as string | undefined,
+    establishment: options['establishment'] as string | undefined,
     dryRun: options['dry-run'] === true,
     batchSize: parseInt(options['batch-size'] as string, 10) || 1000,
+    activeOnly: options['all'] !== true, // --all flag inverts activeOnly
   };
 
   if (!args.enterprise || !args.denomination || !args.address || !args.activity) {
-    console.error('Error: All CSV files are required');
+    console.error('Error: Required CSV files missing');
     console.error('Required: --enterprise, --denomination, --address, --activity');
+    console.error('Optional: --contact, --establishment');
     process.exit(1);
   }
 
-  logger.info('Starting KBO import');
+  logger.info({
+    activeOnly: args.activeOnly,
+    hasContact: !!args.contact,
+    hasEstablishment: !!args.establishment,
+  }, 'Starting KBO import');
 
   const result = await importKboData({
     enterpriseFile: args.enterprise,
     denominationFile: args.denomination,
     addressFile: args.address,
     activityFile: args.activity,
+    contactFile: args.contact,
+    establishmentFile: args.establishment,
     batchSize: args.batchSize,
     dryRun: args.dryRun,
+    activeOnly: args.activeOnly,
   });
 
-  logger.info({ imported: result.imported, skipped: result.skipped }, 'KBO import completed');
+  logger.info({
+    imported: result.imported,
+    skipped: result.skipped,
+    naceCodes: result.naceCodes,
+    contacts: result.contacts,
+  }, 'KBO import completed');
 }
 
 async function runEnrichNbb(options: Record<string, string | boolean>, logger: any): Promise<void> {
