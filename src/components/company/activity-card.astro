@@ -1,21 +1,27 @@
 ---
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Briefcase, Factory } from 'lucide-react';
+import { Briefcase, Factory, History } from 'lucide-react';
 import { getNaceDescription } from '@/lib/data/nace-codes';
 import { t } from '@/lib/i18n/translations';
 import type { SupportedLang } from '@/lib/i18n/translations';
+import type { NaceHistory } from '@/lib/db/types';
 
 interface Props {
   naceMain: string | null;
   naceCodes: string[] | null;
   legalForm: string | null;
+  naceHistory: NaceHistory | null;
   lang: string;
 }
 
-const { naceMain, naceCodes, legalForm, lang } = Astro.props;
+const { naceMain, naceCodes, legalForm, naceHistory, lang } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const mainNaceDescription = naceMain ? getNaceDescription(naceMain, typedLang) : null;
 const otherActivitiesCount = naceCodes && naceCodes.length > 1 ? naceCodes.length - 1 : 0;
+
+// Check if we have NACE history to show
+const hasHistory = naceHistory && Object.keys(naceHistory).length > 0;
+const historyVersions = hasHistory ? Object.keys(naceHistory).sort().reverse() : [];
 ---
 
 <Card className="h-full">
@@ -58,6 +64,31 @@ const otherActivitiesCount = naceCodes && naceCodes.length > 1 ? naceCodes.lengt
       <p class="text-xs text-muted-foreground pl-7">
         +{otherActivitiesCount} {t(typedLang, 'activity', 'otherActivities')}
       </p>
+    )}
+
+    {/* NACE History (expandable) */}
+    {hasHistory && historyVersions.length > 0 && (
+      <details class="group pt-2">
+        <summary class="flex items-center gap-2 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors">
+          <History className="h-3 w-3" />
+          <span>{t(typedLang, 'activity', 'showHistory')}</span>
+        </summary>
+        <div class="mt-3 pl-5 space-y-2 border-l-2 border-muted">
+          {historyVersions.map((version) => (
+            <div class="pl-3">
+              <p class="text-xs font-medium text-muted-foreground">{version}</p>
+              {naceHistory![version].map((entry) => (
+                <p class="text-xs">
+                  <span class="font-mono">{entry.code}</span>
+                  {entry.description && (
+                    <span class="text-muted-foreground"> - {entry.description}</span>
+                  )}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+      </details>
     )}
   </CardContent>
 </Card>

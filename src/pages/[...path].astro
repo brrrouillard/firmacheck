@@ -6,7 +6,16 @@ import Layout from '@/layouts/Layout.astro';
 import '@/styles/global.css';
 import CompanyPage from '@/components/company-page.astro';
 import { getSupabase, normalizeVat, formatVat, slugifyCompanyName } from '@/lib';
-import type { JuridicalSituation, CompanyContact, FinancialSummary } from '@/lib/db/types';
+import type {
+  JuridicalSituation,
+  CompanyContact,
+  FinancialSummary,
+  CompanyFunction,
+  Qualification,
+  EntityLink,
+  NaceHistory,
+  FiscalPeriod,
+} from '@/lib/db/types';
 import type { RelatedCompany } from '@/lib/queries/related-companies';
 import { getNaceDescription } from '@/lib/data/nace-codes';
 
@@ -111,6 +120,15 @@ const companyData = {
   nace_codes: company.nace_codes,
   nace_main: company.nace_main,
   financial_summary: company.financial_summary as FinancialSummary | null,
+  functions: company.functions as CompanyFunction[] | null,
+  // Extended KBO data
+  capital: company.capital as number | null,
+  fiscal_year_end: company.fiscal_year_end as string | null,
+  annual_meeting_month: company.annual_meeting_month as string | null,
+  qualifications: company.qualifications as Qualification[] | null,
+  entity_links: company.entity_links as EntityLink[] | null,
+  nace_history: company.nace_history as NaceHistory | null,
+  exceptional_fiscal_periods: company.exceptional_fiscal_periods as FiscalPeriod[] | null,
   updated_at: company.updated_at,
 };
 

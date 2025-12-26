@@ -1,0 +1,93 @@
+---
+/**
+ * Entity Links Card - Display corporate structure (parent companies, subsidiaries)
+ */
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Network, ArrowUpRight, ArrowDownRight, Link2 } from 'lucide-react';
+import { t } from '@/lib/i18n/translations';
+import type { SupportedLang } from '@/lib/i18n/translations';
+import type { EntityLink } from '@/lib/db/types';
+
+interface Props {
+  entityLinks: EntityLink[] | null;
+  lang: string;
+}
+
+const { entityLinks, lang } = Astro.props;
+const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
+
+// Only render if we have entity links
+const hasLinks = entityLinks && entityLinks.length > 0;
+
+// Group by type
+const predecessors = entityLinks?.filter(l => l.type === 'predecessor') ?? [];
+const successors = entityLinks?.filter(l => l.type === 'successor') ?? [];
+const related = entityLinks?.filter(l => l.type === 'related' || l.type === 'unknown') ?? [];
+
+// Format VAT for display
+const formatVat = (vat: string | null) => {
+  if (!vat) return null;
+  return `BE ${vat.slice(0, 4)}.${vat.slice(4, 7)}.${vat.slice(7)}`;
+};
+
+// Get link type label
+const getLinkLabel = (type: EntityLink['type']) => {
+  switch (type) {
+    case 'predecessor': return t(typedLang, 'entityLinks', 'predecessor');
+    case 'successor': return t(typedLang, 'entityLinks', 'successor');
+    case 'related': return t(typedLang, 'entityLinks', 'related');
+    default: return t(typedLang, 'entityLinks', 'related');
+  }
+};
+
+// Get icon for link type
+const getIcon = (type: EntityLink['type']) => {
+  switch (type) {
+    case 'predecessor': return ArrowUpRight;
+    case 'successor': return ArrowDownRight;
+    default: return Link2;
+  }
+};
+---
+
+{hasLinks && (
+  <Card>
+    <CardHeader className="pb-3">
+      <div class="flex items-center gap-2">
+        <Network className="h-5 w-5 text-muted-foreground" />
+        <CardTitle className="text-base font-medium">
+          {t(typedLang, 'entityLinks', 'title')}
+        </CardTitle>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <ul class="space-y-2">
+        {entityLinks!.map((link) => {
+          const Icon = getIcon(link.type);
+          return (
+            <li class="flex items-start gap-3">
+              <Icon className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <div class="min-w-0">
+                <p class="text-xs text-muted-foreground">{getLinkLabel(link.type)}</p>
+                {link.vat_number ? (
+                  <a
+                    href={`/${lang}/${link.vat_number}/x`}
+                    class="text-sm font-medium text-primary hover:underline"
+                  >
+                    {link.name || formatVat(link.vat_number)}
+                  </a>
+                ) : (
+                  <p class="text-sm font-medium">{link.name || 'Unknown'}</p>
+                )}
+                {link.vat_number && link.name && (
+                  <p class="text-xs text-muted-foreground font-mono">{formatVat(link.vat_number)}</p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </CardContent>
+  </Card>
+)}

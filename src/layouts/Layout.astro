@@ -1,5 +1,6 @@
 ---
 import { Header } from "@/components/header";
+import Footer from "@/components/footer.astro";
 import { t } from "@/lib/i18n/translations";
 import type { SupportedLang } from "@/lib/i18n/translations";
 
@@ -61,8 +62,11 @@ const defaultOgImage = `${siteUrl}/og-image.png`;
       <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
   </head>
-  <body>
+  <body class="min-h-screen flex flex-col">
     <Header searchPlaceholder={searchPlaceholder} lang={typedLang} client:load />
-    <slot />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer lang={typedLang} />
   </body>
 </html>

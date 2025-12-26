@@ -2,10 +2,10 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/copy-button';
-import { Building2, Bell, FileDown, Clock } from 'lucide-react';
+import { Building2, Bell, FileDown, Clock, Receipt, Users } from 'lucide-react';
 import { getJuridicalSituationLabel, getJuridicalSituationColor } from '@/lib/data/juridical-situations';
 import { t, formatDaysAgo } from '@/lib/i18n/translations';
-import type { JuridicalSituation } from '@/lib/db/types';
+import type { JuridicalSituation, Qualification } from '@/lib/db/types';
 import type { SupportedLang } from '@/lib/i18n/translations';
 
 const calculateDaysAgo = (dateStr: string) => {
@@ -22,11 +22,16 @@ interface Props {
   legalForm: string | null;
   juridicalSituation: JuridicalSituation;
   status: 'active' | 'stopped';
+  qualifications: Qualification[] | null;
   updatedAt: string;
   lang: string;
 }
 
-const { name, formattedVat, vatNumber, legalForm, juridicalSituation, status, updatedAt, lang } = Astro.props;
+const { name, formattedVat, vatNumber, legalForm, juridicalSituation, status, qualifications, updatedAt, lang } = Astro.props;
+
+// Check qualification types
+const isVatSubject = qualifications?.some(q => q.type === 'vat_subject') ?? false;
+const isEmployer = qualifications?.some(q => q.type === 'rsz_employer') ?? false;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 const situationLabel = getJuridicalSituationLabel(juridicalSituation, typedLang);
 const situationColorClass = getJuridicalSituationColor(juridicalSituation);
@@ -34,7 +39,7 @@ const daysAgo = calculateDaysAgo(updatedAt);
 const freshnessLabel = formatDaysAgo(daysAgo, typedLang);
 ---
 
-<section class="border-b border-border bg-card">
+<section class="bg-card">
   <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <!-- Company Info -->
@@ -43,7 +48,7 @@ const freshnessLabel = formatDaysAgo(daysAgo, typedLang);
           <Building2 className="h-7 w-7 text-primary" />
         </div>
         <div class="min-w-0">
-          <h1 class="text-2xl font-bold tracking-tight sm:text-3xl truncate">
+          <h1 class="text-2xl font-bold tracking-tight sm:text-3xl truncate flex items-center">
             {name}
             {legalForm && <span class="text-lg font-normal text-muted-foreground ml-2">({legalForm})</span>}
           </h1>
@@ -55,6 +60,18 @@ const freshnessLabel = formatDaysAgo(daysAgo, typedLang);
             <Badge className={situationColorClass}>
               {situationLabel}
             </Badge>
+            {isVatSubject && (
+              <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                <Receipt className="h-3 w-3" />
+                {t(typedLang, 'qualifications', 'vatSubject')}
+              </Badge>
+            )}
+            {isEmployer && (
+              <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                <Users className="h-3 w-3" />
+                {t(typedLang, 'qualifications', 'employer')}
+              </Badge>
+            )}
           </div>
         </div>
       </div>

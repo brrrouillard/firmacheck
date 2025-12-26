@@ -15,15 +15,24 @@ import IdentityCard from './company/identity-card.astro';
 import ActivityCard from './company/activity-card.astro';
 import FinancialPulseCard from './company/financial-pulse-card.astro';
 import FunctionsCard from './company/functions-card.astro';
+import EntityLinksCard from './company/entity-links-card.astro';
 import FaqSection from './company/faq-section.astro';
 import RelatedCompanies from './company/related-companies.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { ExternalLink, Coins, TrendingUp, TrendingDown } from 'lucide-react';
 import { t } from '@/lib/i18n/translations';
 import type { SupportedLang } from '@/lib/i18n/translations';
-import type { JuridicalSituation, CompanyContact, FinancialSummary, CompanyFunction } from '@/lib/db/types';
+import type {
+  JuridicalSituation,
+  CompanyContact,
+  FinancialSummary,
+  CompanyFunction,
+  Qualification,
+  EntityLink,
+  NaceHistory,
+  FiscalPeriod,
+} from '@/lib/db/types';
 import type { RelatedCompany } from '@/lib/queries/related-companies';
 
 interface Props {
@@ -49,6 +58,14 @@ interface Props {
     nace_main: string | null;
     financial_summary: FinancialSummary | null;
     functions: CompanyFunction[] | null;
+    // Extended KBO data
+    capital: number | null;
+    fiscal_year_end: string | null;
+    annual_meeting_month: string | null;
+    qualifications: Qualification[] | null;
+    entity_links: EntityLink[] | null;
+    nace_history: NaceHistory | null;
+    exceptional_fiscal_periods: FiscalPeriod[] | null;
     updated_at: string;
   };
   lang: string;
@@ -83,7 +100,7 @@ const formatCurrency = (value?: number) => {
 };
 ---
 
-<main class="min-h-screen bg-background">
+<div class="min-h-screen bg-background">
   <!-- Hero Section -->
   <HeroSection
     name={company.name}
@@ -92,6 +109,7 @@ const formatCurrency = (value?: number) => {
     legalForm={company.legal_form}
     juridicalSituation={company.juridical_situation}
     status={company.status}
+    qualifications={company.qualifications}
     updatedAt={company.updated_at}
     lang={lang}
   />
@@ -102,12 +120,16 @@ const formatCurrency = (value?: number) => {
       address={company.address}
       startDate={company.start_date}
       contact={company.contact}
+      capital={company.capital}
+      fiscalYearEnd={company.fiscal_year_end}
+      annualMeetingMonth={company.annual_meeting_month}
       lang={lang}
     />
     <ActivityCard
       naceMain={company.nace_main}
       naceCodes={company.nace_codes}
       legalForm={company.legal_form}
+      naceHistory={company.nace_history}
       lang={lang}
     />
     <FinancialPulseCard
@@ -118,16 +140,25 @@ const formatCurrency = (value?: number) => {
 
   <!-- Management Section (if functions available) -->
   {company.functions && company.functions.length > 0 && (
-    <section class="border-t border-border">
+    <section>
       <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
         <FunctionsCard functions={company.functions} lang={lang} />
       </div>
     </section>
   )}
 
+  <!-- Corporate Structure Section (if entity links available) -->
+  {company.entity_links && company.entity_links.length > 0 && (
+    <section>
+      <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <EntityLinksCard entityLinks={company.entity_links} lang={lang} />
+      </div>
+    </section>
+  )}
+
   <!-- Deep Dive Section (if detailed financials available) -->
   {hasDetailedFinancials && (
-    <section class="border-t border-border">
+    <section>
       <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
         <Card>
           <CardHeader className="pb-3">
@@ -199,6 +230,14 @@ const formatCurrency = (value?: number) => {
                 </div>
               )}
             </div>
+            {/* Exceptional Fiscal Periods Note */}
+            {company.exceptional_fiscal_periods && company.exceptional_fiscal_periods.length > 0 && (
+              <p class="mt-4 text-xs text-muted-foreground italic">
+                * {company.exceptional_fiscal_periods.map(p =>
+                  `${p.start_date} - ${p.end_date}`
+                ).join(', ')}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -227,7 +266,6 @@ const formatCurrency = (value?: number) => {
   />
 
   <!-- Footer -->
-  <Separator />
   <footer class="py-4">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       <div class="flex justify-end gap-4">
@@ -252,4 +290,4 @@ const formatCurrency = (value?: number) => {
       </div>
     </div>
   </footer>
-</main>
+</div>

@@ -1,0 +1,71 @@
+---
+import type { SupportedLang } from "@/lib/i18n/translations";
+
+interface Props {
+  lang?: SupportedLang;
+}
+
+const { lang = 'fr' } = Astro.props;
+
+const links = {
+  fr: {
+    about: 'À propos',
+    privacy: 'Confidentialité',
+    contact: 'Contact',
+    dataSources: 'Sources des données',
+  },
+  nl: {
+    about: 'Over ons',
+    privacy: 'Privacy',
+    contact: 'Contact',
+    dataSources: 'Gegevensbronnen',
+  },
+  en: {
+    about: 'About',
+    privacy: 'Privacy',
+    contact: 'Contact',
+    dataSources: 'Data Sources',
+  },
+};
+
+const t = links[lang];
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-border bg-muted/30 mt-auto">
+  <div class="mx-auto max-w-5xl px-6 sm:px-8 lg:px-12 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex flex-col items-center md:items-start gap-2">
+        <span class="text-lg font-bold text-primary">firmacheck</span>
+        <p class="text-sm text-muted-foreground">
+          © {currentYear} FirmaCheck. All rights reserved.
+        </p>
+      </div>
+
+      <nav class="flex flex-wrap justify-center gap-6 text-sm">
+        <a href={`/${lang}/about`} class="text-muted-foreground hover:text-foreground transition-colors">
+          {t.about}
+        </a>
+        <a href={`/${lang}/data-sources`} class="text-muted-foreground hover:text-foreground transition-colors">
+          {t.dataSources}
+        </a>
+        <a href={`/${lang}/privacy`} class="text-muted-foreground hover:text-foreground transition-colors">
+          {t.privacy}
+        </a>
+        <a href={`/${lang}/contact`} class="text-muted-foreground hover:text-foreground transition-colors">
+          {t.contact}
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <div class="flex gap-2 text-sm">
+          <a href="/fr" class:list={["hover:text-foreground transition-colors", lang === 'fr' ? 'text-foreground font-medium' : 'text-muted-foreground']}>FR</a>
+          <span class="text-muted-foreground">|</span>
+          <a href="/nl" class:list={["hover:text-foreground transition-colors", lang === 'nl' ? 'text-foreground font-medium' : 'text-muted-foreground']}>NL</a>
+          <span class="text-muted-foreground">|</span>
+          <a href="/en" class:list={["hover:text-foreground transition-colors", lang === 'en' ? 'text-foreground font-medium' : 'text-muted-foreground']}>EN</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,6 +1,6 @@
 ---
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Calendar, Mail, Phone, Globe } from 'lucide-react';
+import { MapPin, Calendar, Mail, Phone, Globe, Landmark, CalendarClock } from 'lucide-react';
 import { t } from '@/lib/i18n/translations';
 import type { SupportedLang } from '@/lib/i18n/translations';
 
@@ -18,10 +18,13 @@ interface Props {
     email?: string;
     website?: string;
   } | null;
+  capital: number | null;
+  fiscalYearEnd: string | null;
+  annualMeetingMonth: string | null;
   lang: string;
 }
 
-const { address, startDate, contact, lang } = Astro.props;
+const { address, startDate, contact, capital, fiscalYearEnd, annualMeetingMonth, lang } = Astro.props;
 const typedLang = (lang === 'nl' ? 'nl' : lang === 'en' ? 'en' : 'fr') as SupportedLang;
 
 // Calculate company age
@@ -45,6 +48,16 @@ const formatDate = (dateStr: string | null) => {
 };
 
 const foundedDate = formatDate(startDate);
+
+// Format currency
+const formatCurrency = (value: number) => {
+  const locale = typedLang === 'nl' ? 'nl-BE' : 'fr-BE';
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value);
+};
 
 // Format address
 const boxLabel = t(typedLang, 'identity', 'box');
@@ -106,6 +119,28 @@ const formatWebsite = (url?: string) => {
         <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
         <span class="text-sm">
           {t(typedLang, 'identity', 'foundedIn')} {foundedDate} ({age} {t(typedLang, 'identity', 'yearsOld')})
+        </span>
+      </div>
+    )}
+
+    {/* Capital */}
+    {capital !== null && capital > 0 && (
+      <div class="flex items-center gap-3">
+        <Landmark className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span class="text-sm">
+          {t(typedLang, 'identity', 'capital')}: {formatCurrency(capital)}
+        </span>
+      </div>
+    )}
+
+    {/* Fiscal Year Info */}
+    {(fiscalYearEnd || annualMeetingMonth) && (
+      <div class="flex items-center gap-3">
+        <CalendarClock className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span class="text-sm">
+          {fiscalYearEnd && `${t(typedLang, 'identity', 'fiscalYearEnd')}: ${fiscalYearEnd}`}
+          {fiscalYearEnd && annualMeetingMonth && ' • '}
+          {annualMeetingMonth && `${t(typedLang, 'identity', 'annualMeeting')} ${annualMeetingMonth}`}
         </span>
       </div>
     )}
