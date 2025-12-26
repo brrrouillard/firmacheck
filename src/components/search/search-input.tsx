@@ -3,7 +3,7 @@ import { SearchIcon, Loader2Icon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { SearchResult } from '@/pages/api/search.json';
+import type { SearchResult } from '@/pages/api/search';
 
 interface SearchInputProps {
   placeholder: string;
@@ -47,7 +47,7 @@ export function SearchInput({ placeholder, lang, className, autoFocus }: SearchI
 
     try {
       const response = await fetch(
-        `/api/search.json?q=${encodeURIComponent(searchQuery)}&lang=${lang}`,
+        `/api/search?q=${encodeURIComponent(searchQuery)}&lang=${lang}`,
         { signal: abortControllerRef.current.signal }
       );
 
