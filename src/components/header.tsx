@@ -1,10 +1,11 @@
-import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/search/search-input"
 
 interface HeaderProps {
   searchPlaceholder?: string;
+  lang?: 'fr' | 'nl' | 'en';
 }
 
-export function Header({ searchPlaceholder = "Search companies..." }: HeaderProps) {
+export function Header({ searchPlaceholder = "Search companies...", lang = 'fr' }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 items-center px-4">
@@ -12,11 +13,10 @@ export function Header({ searchPlaceholder = "Search companies..." }: HeaderProp
           <span className="text-xl font-bold text-primary">firmascan</span>
         </a>
         <div className="flex-1 flex justify-center px-4">
-          <Input
-            type="search"
+          <SearchInput
             placeholder={searchPlaceholder}
+            lang={lang}
             className="w-full max-w-md"
-            disabled
           />
         </div>
         <div className="w-[100px]" />

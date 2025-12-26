@@ -22,7 +22,7 @@ const searchPlaceholder = t(typedLang, 'header', 'searchPlaceholder');
     <title>{title}</title>
   </head>
   <body>
-    <Header searchPlaceholder={searchPlaceholder} />
+    <Header searchPlaceholder={searchPlaceholder} lang={typedLang} client:load />
     <slot />
   </body>
 </html>
