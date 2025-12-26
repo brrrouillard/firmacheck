@@ -1,0 +1,52 @@
+---
+import { SearchInput } from '@/components/search/search-input';
+
+interface Props {
+  lang?: 'fr' | 'nl' | 'en';
+}
+
+const { lang = 'fr' } = Astro.props;
+
+const translations = {
+  fr: {
+    headline: 'Vérifiez n\'importe quelle entreprise belge instantanément.',
+    subheadline: 'Accédez à la santé financière, aux scores de risque et aux données officielles de plus de 2,5M d\'entreprises.',
+    placeholder: 'ex: BE 0456.789.123 ou "Colruyt Group"',
+  },
+  nl: {
+    headline: 'Controleer elk Belgisch bedrijf direct.',
+    subheadline: 'Toegang tot financiële gezondheid, risicoscores en officiële gegevens van meer dan 2,5M bedrijven.',
+    placeholder: 'bv. BE 0456.789.123 of "Colruyt Group"',
+  },
+  en: {
+    headline: 'Verify any Belgian Company instantly.',
+    subheadline: 'Access financial health, risk scores, and official data for 2.5M+ entities.',
+    placeholder: 'e.g., BE 0456.789.123 or "Colruyt Group"',
+  },
+};
+
+const t = translations[lang];
+---
+
+<main class="flex flex-col items-center justify-center min-h-[calc(100vh-3.5rem)] px-4">
+  <div class="max-w-2xl w-full text-center space-y-8">
+    <div class="space-y-4">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+        {t.headline}
+      </h1>
+      <p class="text-lg sm:text-xl text-muted-foreground">
+        {t.subheadline}
+      </p>
+    </div>
+
+    <div class="w-full max-w-lg mx-auto">
+      <SearchInput
+        placeholder={t.placeholder}
+        lang={lang}
+        autoFocus
+        className="w-full"
+        client:load
+      />
+    </div>
+  </div>
+</main>

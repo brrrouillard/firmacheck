@@ -1,9 +1,4 @@
 ---
-import Layout from '@/layouts/Layout.astro';
-import '@/styles/global.css';
-import { ComponentExample } from '@/components/component-example';
+// Redirect root to default language (French)
+return Astro.redirect('/fr/', 302);
 ---
-
-<Layout title="Firmacheck">
-  <ComponentExample client:load />
-</Layout>

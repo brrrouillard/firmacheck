@@ -1,0 +1,33 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import '@/styles/global.css';
+import LandingHero from '@/components/landing-hero.astro';
+
+const SUPPORTED_LANGS = ['fr', 'nl', 'en'] as const;
+type Lang = (typeof SUPPORTED_LANGS)[number];
+
+const { lang } = Astro.params;
+
+// Validate language, redirect to French if invalid
+if (!lang || !SUPPORTED_LANGS.includes(lang as Lang)) {
+  return Astro.redirect('/fr/', 302);
+}
+
+const typedLang = lang as Lang;
+
+const titles = {
+  fr: 'FirmaCheck - Vérifiez n\'importe quelle entreprise belge instantanément',
+  nl: 'FirmaCheck - Controleer elk Belgisch bedrijf direct',
+  en: 'FirmaCheck - Verify any Belgian Company instantly',
+};
+
+const descriptions = {
+  fr: 'Accédez à la santé financière, aux scores de risque et aux données officielles de plus de 2,5M d\'entreprises belges.',
+  nl: 'Toegang tot financiële gezondheid, risicoscores en officiële gegevens van meer dan 2,5M Belgische bedrijven.',
+  en: 'Access financial health, risk scores, and official data for 2.5M+ Belgian companies.',
+};
+---
+
+<Layout title={titles[typedLang]} description={descriptions[typedLang]} lang={typedLang}>
+  <LandingHero lang={typedLang} />
+</Layout>

@@ -9,6 +9,7 @@ interface SearchInputProps {
   placeholder: string;
   lang: 'fr' | 'nl' | 'en';
   className?: string;
+  autoFocus?: boolean;
 }
 
 const translations = {
@@ -17,7 +18,7 @@ const translations = {
   en: { noResults: 'No companies found' },
 } as const;
 
-export function SearchInput({ placeholder, lang, className }: SearchInputProps) {
+export function SearchInput({ placeholder, lang, className, autoFocus }: SearchInputProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,6 +137,7 @@ export function SearchInput({ placeholder, lang, className }: SearchInputProps) 
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => query.length >= 3 && results.length > 0 && setIsOpen(true)}
+          autoFocus={autoFocus}
           className="pl-9 pr-9"
         />
         {isLoading && (
