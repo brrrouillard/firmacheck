@@ -7,6 +7,10 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
   integrations: [react()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   vite: {
     plugins: [tailwindcss()],
     resolve: {
