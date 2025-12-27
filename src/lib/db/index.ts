@@ -5,7 +5,7 @@
  */
 
 // Client
-export { getSupabase, createSupabaseClient } from './client';
+export { getSupabase } from './client';
 
 // Types
 export type {

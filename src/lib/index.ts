@@ -23,7 +23,6 @@ export { slugify, slugifyCompanyName, type SlugifyOptions } from './slugify';
 // Database
 export {
   getSupabase,
-  createSupabaseClient,
   type Database,
   type Company,
   type CompanyInsert,

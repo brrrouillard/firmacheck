@@ -1,8 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-let supabase: SupabaseClient<Database> | null = null;
-
 /**
  * Get environment variables from various sources.
  * Priority: Cloudflare runtime env > import.meta.env > process.env
@@ -24,59 +22,14 @@ function getEnvVar(name: string, runtimeEnv?: Record<string, string>): string | 
 }
 
 /**
- * Get Supabase client singleton.
- * Use this for server-side operations in Astro pages/endpoints.
+ * Get Supabase client for server-side operations.
+ * Creates a fresh client per request to avoid concurrency issues.
  *
  * @param runtimeEnv - Optional Cloudflare runtime env (from context.locals.runtime.env)
  */
 export function getSupabase(runtimeEnv?: Record<string, string>): SupabaseClient<Database> {
-  // If runtime env provided, always create fresh client (different requests may have different env)
-  if (runtimeEnv) {
-    const supabaseUrl = getEnvVar('SUPABASE_URL', runtimeEnv);
-    const supabaseKey = getEnvVar('SUPABASE_ANON_KEY', runtimeEnv);
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error(
-        'Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_ANON_KEY.'
-      );
-    }
-
-    return createClient<Database>(supabaseUrl, supabaseKey, {
-      auth: {
-        persistSession: false,
-      },
-    });
-  }
-
-  // Use singleton for non-Cloudflare environments
-  if (supabase) {
-    return supabase;
-  }
-
-  const supabaseUrl = getEnvVar('SUPABASE_URL');
-  const supabaseKey = getEnvVar('SUPABASE_ANON_KEY');
-
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error(
-      'Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env'
-    );
-  }
-
-  supabase = createClient<Database>(supabaseUrl, supabaseKey, {
-    auth: {
-      persistSession: false,
-    },
-  });
-
-  return supabase;
-}
-
-/**
- * Create a fresh Supabase client (useful for isolated requests).
- */
-export function createSupabaseClient(): SupabaseClient<Database> {
-  const supabaseUrl = import.meta.env.SUPABASE_URL;
-  const supabaseKey = import.meta.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = getEnvVar('SUPABASE_URL', runtimeEnv);
+  const supabaseKey = getEnvVar('SUPABASE_ANON_KEY', runtimeEnv);
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
@@ -90,3 +43,4 @@ export function createSupabaseClient(): SupabaseClient<Database> {
     },
   });
 }
+
